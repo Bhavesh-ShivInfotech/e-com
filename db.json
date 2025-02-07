@@ -1,0 +1,76 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "email": "admin@example.com",
+      "password": "password123",
+      "token": "fake-jwt-token"
+    },
+    {
+      "id": "aa88"
+    },
+    {
+      "id": "bf05",
+      "email": "panchalh543@gmail.com",
+      "password": "123456"
+    },
+    {
+      "id": "e302",
+      "email": "Bha1@gmail.com",
+      "password": "321654"
+    },
+    {
+      "id": "d2af",
+      "email": "Bha1@gmail.com",
+      "password": "123456"
+    },
+    {
+      "id": "99c1",
+      "email": "Bha1@gmail.com",
+      "password": "123456"
+    },
+    {
+      "id": "ed29"
+    },
+    {
+      "id": "e01b",
+      "email": "panchalh543@gmail.com",
+      "password": "123456"
+    },
+    {
+      "id": "72b7",
+      "email": "panchalh543@gmail.com",
+      "password": "7441258"
+    },
+    {
+      "id": "25e1",
+      "email": "bp222@gmail.com",
+      "password": "123456"
+    },
+    {
+      "id": "c98e",
+      "email": "panchalh543@gmail.com",
+      "password": "123456"
+    },
+    {
+      "id": "32ff",
+      "email": "panchalh543@gmail.com",
+      "password": "123456"
+    },
+    {
+      "id": "8cfe",
+      "email": "panchalh543@gmail.com",
+      "password": "123654"
+    },
+    {
+      "id": "fdbe",
+      "email": "panchalh543@gmail.com",
+      "password": "123456"
+    },
+    {
+      "id": "be57",
+      "email": "Bha1@gmail.com",
+      "password": "123654"
+    }
+  ]
+}
