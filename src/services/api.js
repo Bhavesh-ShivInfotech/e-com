@@ -1,0 +1,20 @@
+//setup Axios
+import axios from "axios";
+
+const API = axios.create({
+  //   baseURL: "http://localhost:5000/api",
+  baseURL: "https://e-commerce-l39u.onrender.com",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("adminToken");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export default API;
