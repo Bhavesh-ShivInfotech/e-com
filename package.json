@@ -8,8 +8,10 @@
     "bootstrap": "^5.3.3",
     "cra-template": "1.2.0",
     "formik": "^2.4.6",
+    "html-parse-stringify": "^3.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-i18next": "^15.4.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.1.5",
     "react-scripts": "5.0.1",
@@ -19,6 +21,7 @@
     "resolve-url-loader": "^5.0.0",
     "sass": "^1.84.0",
     "simple-react-validator": "^1.6.2",
+    "simplebar-react": "^3.3.0",
     "web-vitals": "^4.2.4",
     "yup": "^1.6.1"
   },
@@ -45,5 +48,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "ajv-keywords": "^5.1.0",
+    "schema-utils": "^4.3.0",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
   }
 }
