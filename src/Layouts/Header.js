@@ -10,7 +10,7 @@ import { Dropdown, DropdownMenu, DropdownToggle, Form } from "reactstrap";
 //import Components
 import SearchOption from "../Components/Common/SearchOption";
 import ProfileDropdown from "../Components/Common/ProfileDropdown";
-import LightDark from "../Components/Common/LightDark";
+// import LightDark from "../Components/Common/LightDark";
 
 import { changeSidebarVisibility } from "../slices/thunks";
 import { useSelector, useDispatch } from "react-redux";
@@ -130,10 +130,10 @@ const Header = ({ onChangeLayoutMode, layoutModeType, headerClass }) => {
               </Dropdown>
 
               {/* Dark/Light Mode set */}
-              <LightDark
+              {/* <LightDark
                 layoutMode={layoutModeType}
                 onChangeLayoutMode={onChangeLayoutMode}
-              />
+              /> */}
 
               {/* ProfileDropdown */}
               <ProfileDropdown />
