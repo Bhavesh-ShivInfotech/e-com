@@ -5,11 +5,6 @@ import { Input } from "reactstrap";
 //SimpleBar
 import SimpleBar from "simplebar-react";
 
-//import images
-// import image2 from "../../assets/images/users/avatar-2.jpg";
-// import image3 from "../../assets/images/users/avatar-3.jpg";
-// import image5 from "../../assets/images/users/avatar-5.jpg";
-
 const SearchOption = () => {
   const [value, setValue] = useState("");
   const onChangeData = (value) => {
@@ -126,52 +121,6 @@ const SearchOption = () => {
                 Members
               </h6>
             </div>
-
-            {/* <div className="notification-list">
-              <Link to="#" className="dropdown-item notify-item py-2">
-                <div className="d-flex">
-                  <img
-                    src={image2}
-                    className="me-3 rounded-circle avatar-xs"
-                    alt="user-pic"
-                  />
-                  <div className="flex-grow-1">
-                    <h6 className="m-0">Angela Bernier</h6>
-                    <span className="fs-11 mb-0 text-muted">Manager</span>
-                  </div>
-                </div>
-              </Link>
-
-              <Link to="#" className="dropdown-item notify-item py-2">
-                <div className="d-flex">
-                  <img
-                    src={image3}
-                    className="me-3 rounded-circle avatar-xs"
-                    alt="user-pic"
-                  />
-                  <div className="flex-grow-1">
-                    <h6 className="m-0">David Grasso</h6>
-                    <span className="fs-11 mb-0 text-muted">Web Designer</span>
-                  </div>
-                </div>
-              </Link>
-
-              <Link to="#" className="dropdown-item notify-item py-2">
-                <div className="d-flex">
-                  <img
-                    src={image5}
-                    className="me-3 rounded-circle avatar-xs"
-                    alt="user-pic"
-                  />
-                  <div className="flex-grow-1">
-                    <h6 className="m-0">Mike Bunch</h6>
-                    <span className="fs-11 mb-0 text-muted">
-                      React Developer
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </div> */}
           </SimpleBar>
 
           <div className="text-center pt-3 pb-1">

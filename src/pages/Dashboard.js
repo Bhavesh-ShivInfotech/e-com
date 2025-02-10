@@ -1,16 +1,17 @@
 import React from "react";
-import Header from "../Layouts/Header";
-import Footer from "../Layouts/Footer";
-import Sidebar from "../Layouts/Sidebar";
 import Layout from "../Layouts/index";
+import Section from "./DashboardEcommerce/Section";
+import TileBoxs from "./Widgets/TileBoxs";
+// import Widgets from "./DashboardEcommerce/Widgets";
 const Dashboard = () => {
   return (
-    <>
-      {/* <Header />
-      <Sidebar />
-      <Footer /> */}{" "}
-      <Layout />
-    </>
+    <Layout>
+      <div className="container pt-5">
+        <Section />
+        <TileBoxs />
+        {/* <Widgets /> */}
+      </div>
+    </Layout>
   );
 };
 

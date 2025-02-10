@@ -2,15 +2,9 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Dropdown, DropdownMenu, DropdownToggle, Form } from "reactstrap";
 
-//import images
-// import logoSm from "../assets/images/logo-sm.png";
-// import logoDark from "../assets/images/logo-light.png";
-// import logoLight from "../assets/images/logo-light.png";
-
 //import Components
 import SearchOption from "../Components/Common/SearchOption";
 import ProfileDropdown from "../Components/Common/ProfileDropdown";
-// import LightDark from "../Components/Common/LightDark";
 
 import { changeSidebarVisibility } from "../slices/thunks";
 import { useSelector, useDispatch } from "react-redux";
@@ -128,12 +122,6 @@ const Header = ({ onChangeLayoutMode, layoutModeType, headerClass }) => {
                   </Form>
                 </DropdownMenu>
               </Dropdown>
-
-              {/* Dark/Light Mode set */}
-              {/* <LightDark
-                layoutMode={layoutModeType}
-                onChangeLayoutMode={onChangeLayoutMode}
-              /> */}
 
               {/* ProfileDropdown */}
               <ProfileDropdown />

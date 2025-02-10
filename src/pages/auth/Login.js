@@ -9,6 +9,7 @@ import {
   Row,
   Button,
   Form,
+  Spinner,
 } from "reactstrap";
 import ParticlesAuth from "../AuthenticationInner/ParticlesAuth";
 import { Link, useNavigate } from "react-router-dom";
@@ -16,12 +17,14 @@ import withRouter from "../../Components/Common/withRouter";
 import logoLight from "../../assets/images/logo-light.png";
 import SimpleReactValidator from "simple-react-validator";
 import API from "../../services/api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./login.css";
 
 const Login = (props) => {
-  const [userLogin, setUserLogin] = useState({ email: "", password: "" });
+  const [userLogin, setUserLogin] = useState({ email_id: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const validator = useRef(new SimpleReactValidator());
@@ -34,62 +37,64 @@ const Login = (props) => {
     setUserLogin({ ...userLogin, [e.target.name]: e.target.value });
   };
 
-  // const handleLogin = async (e) => {
-  //   e.preventDefault();
-  //   setError("");
-
-  //   if (validator.current.allValid()) {
-  //     try {
-  //       const response = await API.post("/admin/login", userLogin);
-  //       localStorage.setItem("adminToken", response.data.token);
-  //       navigate("/dashboard");
-  //     } catch (err) {
-  //       setError(
-  //         err.response?.data?.message || "Login failed. Please try again."
-  //       );
-  //     }
-  //   } else {
-  //     validator.current.showMessages();
-  //     setError("Please fix the validation errors.");
-  //   }
-  // };
-
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
+    setLoading(true);
 
     if (validator.current.allValid()) {
       try {
-        const response = await API.post("/users", {
-          email: userLogin.email,
+        const response = await API.post("/api/admin/login", {
+          email_id: userLogin.email_id,
           password: userLogin.password,
+          role: "Admin",
         });
 
-        console.log("Full Response:", response);
+        localStorage.setItem("adminToken", response.data.token);
 
-        if (response.status === 200 || response.status === 201) {
-          console.log("Response Data Email:", response.data?.email);
+        toast.success("Login successful! Redirecting to Dashboard...", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
 
-          if (response.data?.email) {
-            localStorage.setItem("adminToken", response.data.email);
-
-            console.log("Login successful! Navigating to Dashboard...");
-            navigate("/dashboard");
-          } else {
-            setError("Invalid email or password.");
-            console.log("Email is not valid in the response.");
-          }
-        } else {
-          setError("Login failed. Please try again.");
-          console.log("Response status is not 200 or 201:", response.status);
-        }
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 3000);
       } catch (err) {
-        console.error("Login Error:", err);
-        setError("Login failed. Please try again.");
+        toast.error(
+          err.response?.data?.message || "Login failed. Please try again.",
+          {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+          }
+        );
+      } finally {
+        setLoading(false);
       }
     } else {
       validator.current.showMessages();
-      setError("Please fix the validation errors.");
+      toast.error("Please fix the validation errors.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      setLoading(false);
     }
   };
 
@@ -103,7 +108,7 @@ const Login = (props) => {
                 <div className="text-center mt-sm-5 mb-4 text-white-50">
                   <div>
                     <Link to="/" className="d-inline-block auth-logo">
-                      <img src={logoLight} alt="" height="25" width="250" />
+                      <img src={logoLight} alt="" height="30" width="250" />
                     </Link>
                   </div>
                 </div>
@@ -120,20 +125,20 @@ const Login = (props) => {
                     <div className="p-2 mt-4">
                       <Form onSubmit={handleLogin}>
                         <div className="mb-4">
-                          <Label htmlFor="email" className="form-label">
+                          <Label htmlFor="email_id" className="form-label">
                             Email
                           </Label>
                           <Input
-                            name="email"
+                            name="email_id"
                             className="form-control"
                             placeholder="Enter email"
                             type="email"
-                            value={userLogin.email}
+                            value={userLogin.email_id}
                             onChange={handleChange}
                           />
                           {validator.current.message(
-                            "email",
-                            userLogin.email,
+                            "email_id",
+                            userLogin.email_id,
                             "required|email"
                           )}
                         </div>
@@ -185,15 +190,14 @@ const Login = (props) => {
                           </div>
                         </div>
 
-                        {error && <p style={{ color: "red" }}>{error}</p>}
-
                         <div className="mt-5">
                           <Button
                             color="success"
                             className="btn btn-success w-100 fs-5 fw-bold"
                             type="submit"
+                            disabled={loading}
                           >
-                            Sign In
+                            {loading ? <Spinner size="sm" /> : "Sign In"}
                           </Button>
                         </div>
                       </Form>
@@ -205,6 +209,20 @@ const Login = (props) => {
           </Container>
         </div>
       </ParticlesAuth>
+
+      {/* Toast Notification Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </React.Fragment>
   );
 };

@@ -47,49 +47,53 @@ const Navdata = () => {
       id: "dashboard",
       label: "Dashboard",
       icon: "mdi mdi-speedometer",
-      link: "/#",
+      link: "/dashboard",
       stateVariables: isDashboard,
       click: function (e) {
         e.preventDefault();
         setIsDashboard(!isDashboard);
         setIscurrentState("Dashboard");
         updateIconSidebar(e);
+        // history("/dashboard");
       },
     },
     {
       id: "category",
       label: "Category",
       icon: "mdi mdi-view-list",
-      link: "/#",
+      link: "/category",
       click: function (e) {
         e.preventDefault();
         setIsCategory(!isCategory);
         setIscurrentState("Category");
         updateIconSidebar(e);
+        // history("/category");
       },
     },
     {
       id: "product",
       label: "Product",
       icon: "mdi mdi-package-variant",
-      link: "/#",
+      link: "/product",
       click: function (e) {
         e.preventDefault();
         setIsProduct(!isProduct);
         setIscurrentState("Product");
         updateIconSidebar(e);
+        // history("/product");
       },
     },
     {
       id: "report",
       label: "Report",
       icon: "mdi mdi-file-document-outline",
-      link: "/#",
+      link: "/report",
       click: function (e) {
         e.preventDefault();
         setIsReport(!isReport);
         setIscurrentState("Report");
         updateIconSidebar(e);
+        // history("/report");
       },
     },
   ];
