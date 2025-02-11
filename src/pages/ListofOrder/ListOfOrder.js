@@ -3,7 +3,7 @@ import API from "../../services/api";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const ListOfOrder = () => {
-  const [customers, setCustomers] = useState([]); 
+  const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,7 +15,7 @@ const ListOfOrder = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await API.get(apiEndpoint4); 
+        const response = await API.get(apiEndpoint4);
         setCustomers(response.data.data);
       } catch (err) {
         console.error(
@@ -46,7 +46,6 @@ const ListOfOrder = () => {
     }
   };
 
-
   const filteredCustomers = customers.filter(
     (customer) =>
       customer.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -58,6 +57,23 @@ const ListOfOrder = () => {
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
   const currentRows = filteredCustomers.slice(indexOfFirstRow, indexOfLastRow);
+
+  // Function to determine status pill class based on status value
+  const getStatusClass = (status) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return "bg-danger text-white";
+      case "success":
+        return "bg-info text-white";
+      case "rejected":
+      case "approve":
+      case "confirmed":
+      case "failed":
+        return "bg-warning text-dark";
+      default:
+        return "bg-secondary text-white";
+    }
+  };
 
   return (
     <div className="container mt-4 mb-5">
@@ -110,7 +126,15 @@ const ListOfOrder = () => {
                     <td>{customer.lastName || "N/A"}</td>
                     <td>{customer.email || "N/A"}</td>
                     <td>{customer.total_amount}</td>
-                    <td>{customer.status}</td>
+                    <td>
+                      <span
+                        className={`badge rounded-pill ${getStatusClass(
+                          customer.status
+                        )}`}
+                      >
+                        {customer.status}
+                      </span>
+                    </td>
                     <td>{customer.discount}</td>
                     <td>{customer.tax || "N/A"}</td>
                   </tr>

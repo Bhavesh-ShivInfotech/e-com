@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/auth/Login";
 import ForgetPasswordPage from "../pages/auth/ForgetPassword";
 import Dashboard from "../pages/Dashboard";
@@ -10,6 +10,7 @@ import Report from "../pages/Report";
 const AppRoutes = () => {
   return (
     <Routes>
+      <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgetPasswordPage />} />
       <Route path="/dashboard" element={<Dashboard />} />

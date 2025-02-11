@@ -1,26 +1,27 @@
-import React, { useState, useEffect } from "react";
-// import { useSelector } from "react-redux";
+import React, { useState } from "react";
 import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
 } from "reactstrap";
+import { useNavigate } from "react-router-dom";
 
-//import images
 import avatar1 from "../../assets/images/users/avatar-1.jpg";
-import { createSelector } from "reselect";
 
 const ProfileDropdown = () => {
-  const profiledropdownData = createSelector(
-    (state) => state.Profile,
-    (user) => user.user
-  );
-  //Dropdown Toggle
   const [isProfileDropdown, setIsProfileDropdown] = useState(false);
   const toggleProfileDropdown = () => {
     setIsProfileDropdown(!isProfileDropdown);
   };
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    navigate("/login");
+  };
+
   return (
     <React.Fragment>
       <Dropdown
@@ -48,14 +49,12 @@ const ProfileDropdown = () => {
             <span className="align-middle">Profile</span>
           </DropdownItem>
           <DropdownItem href="/change-password">
-            <i className="mdi mdi-message-text-outline text-muted fs-16 align-middle me-1"></i>{" "}
+            <i className="mdi mdi-message-text-outline text-muted fs-16 align-middle me-1"></i>
             <span className="align-middle">Change Password</span>
           </DropdownItem>
-          <DropdownItem href="/logout">
-            <i className="mdi mdi-logout text-muted fs-16 align-middle me-1"></i>{" "}
-            <span className="align-middle" data-key="t-logout">
-              Logout
-            </span>
+          <DropdownItem onClick={handleLogout}>
+            <i className="mdi mdi-logout text-muted fs-16 align-middle me-1"></i>
+            <span className="align-middle">Logout</span>
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>

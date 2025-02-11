@@ -48,34 +48,27 @@ const Login = (props) => {
           password: userLogin.password,
           role: "Admin",
         });
-        localStorage.setItem("adminToken", response.data.data.token);
 
-        toast.success("Login successful! Redirecting to Dashboard...", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+        if (response.data && response.data.data) {
+          localStorage.setItem("adminToken", response.data.data.token);
 
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 3000);
+          toast.success(response.data.message || "Login successful!", {
+            position: "top-right",
+            autoClose: 3000,
+          });
+
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 3000);
+        } else {
+          throw new Error("Invalid response from server.");
+        }
       } catch (err) {
         toast.error(
           err.response?.data?.message || "Login failed. Please try again.",
           {
             position: "top-right",
             autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
           }
         );
       } finally {
@@ -86,12 +79,6 @@ const Login = (props) => {
       toast.error("Please fix the validation errors.", {
         position: "top-right",
         autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
       });
       setLoading(false);
     }
@@ -210,18 +197,7 @@ const Login = (props) => {
       </ParticlesAuth>
 
       {/* Toast Notification Container */}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
+      <ToastContainer position="top-right" autoClose={3000} />
     </React.Fragment>
   );
 };
