@@ -48,8 +48,7 @@ const Login = (props) => {
           password: userLogin.password,
           role: "Admin",
         });
-
-        localStorage.setItem("adminToken", response.data.token);
+        localStorage.setItem("adminToken", response.data.data.token);
 
         toast.success("Login successful! Redirecting to Dashboard...", {
           position: "top-right",

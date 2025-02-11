@@ -3,8 +3,8 @@ import Layout from "../Layouts/index";
 import Section from "./DashboardEcommerce/Section";
 import Cards from "./DashboardCards/DashboardCards";
 import CustomersTable from "./CustomerTable/CustomerTable";
-// import TileBoxs from "./Widgets/TileBoxs";
-// import Widgets from "./DashboardEcommerce/Widgets";
+import ListOfOrder from "./ListofOrder/ListOfOrder";
+
 const Dashboard = () => {
   return (
     <Layout>
@@ -12,8 +12,7 @@ const Dashboard = () => {
         <Section />
         <Cards />
         <CustomersTable />
-        {/* <TileBoxs /> */}
-        {/* <Widgets /> */}
+        <ListOfOrder />
       </div>
     </Layout>
   );

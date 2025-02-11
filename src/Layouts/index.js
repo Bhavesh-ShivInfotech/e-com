@@ -55,7 +55,6 @@ const Layout = (props) => {
     leftsidbarSizeType,
     leftSidebarViewType,
     leftSidebarImageType,
-    preloader,
     sidebarVisibilitytype,
   } = useSelector(selectLayoutProperties);
 
