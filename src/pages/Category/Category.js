@@ -12,38 +12,22 @@ const Category = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await API.post(
-          "/api/category/listOfCategory",
-          {
-            model: "Category",
-            limit: 500,
-            condition: {
-              is_archived: false,
-            },
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (response.data && response.data.data) {
-          setCategories(response.data.data);
-        } else {
-          throw new Error("Invalid data structure received.");
-        }
-      } catch (err) {
-        console.error("Error fetching categories:", {
-          message: err.message,
-          response: err.response?.data,
-          status: err.response?.status,
+        const response = await API.post("/api/category/listOfCategory", {
+          model: "Category",
+          limit: 500,
+          condition: { is_archived: false },
         });
+
+        setCategories(response.data?.data || []);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
       } finally {
         setLoading(false);
       }
@@ -51,146 +35,186 @@ const Category = () => {
 
     fetchCategories();
   }, []);
-  const filteredCategories = categories.filter(
-    (category) =>
-      category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchTerm.toLowerCase())
+
+  const filteredCategories = categories.filter(({ name, description }) =>
+    [name, description].some((field) =>
+      field.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
 
   const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
-  const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredCategories.slice(indexOfFirstRow, indexOfLastRow);
+  const currentRows = filteredCategories.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  const handleDeleteClick = (category) => {
+    setCategoryToDelete(category);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!categoryToDelete) return;
+
+    try {
+      await API.put(`/api/category/deleteCategory/${categoryToDelete.id}`, {
+        is_archived: true,
+      });
+      setCategories(categories.filter(({ id }) => id !== categoryToDelete.id));
+    } catch (error) {
+      console.error("Error deleting category:", error);
+    } finally {
+      setShowDeleteModal(false);
+      setCategoryToDelete(null);
+    }
+  };
 
   return (
     <Layout>
-      <div className="category-container container">
-        <div className="row">
-          <div className="col-12">
-            <h1 className="text-left mb-4">Category</h1>
-          </div>
+      <div className="container category-container">
+        <h1 className="mb-4">Category</h1>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <input
+            type="text"
+            className="form-control w-25"
+            placeholder="Search by name or description"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate("/addcategory")}
+          >
+            Add Category
+          </button>
+        </div>
 
-          <div className="col-12">
-            <div className="d-flex justify-content-between mb-3">
-              <button
-                className="btn btn-primary"
-                style={{ position: "absolute", top: "20px", right: "20px" }}
-                onClick={() => navigate("/addcategory")}
-              >
-                Add Category
-              </button>
-              <input
-                type="text"
-                className="form-control w-25"
-                placeholder="Search by name or description"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ marginTop: "40px" }}
-              />
-            </div>
-
-            <div className="table-responsive">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Image</th>
-                    <th>Action</th>
+        <div className="table-responsive">
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="5">Loading...</td>
+                </tr>
+              ) : currentRows.length > 0 ? (
+                currentRows.map(({ id, name, description, image }) => (
+                  <tr key={id}>
+                    <td>{id}</td>
+                    <td>{name}</td>
+                    <td>{description}</td>
+                    <td>
+                      <img
+                        src={image}
+                        alt={name}
+                        className="img-thumbnail"
+                        style={{ width: "80px", height: "80px" }}
+                      />
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-warning btn-sm mx-1"
+                        onClick={() => navigate(`/editcategory/${id}`)}
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm mx-1"
+                        onClick={() => handleDeleteClick({ id })}
+                      >
+                        <FaTrashAlt />
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan="5">Loading...</td>
-                    </tr>
-                  ) : currentRows.length > 0 ? (
-                    currentRows.map((category) => (
-                      <tr key={category.id}>
-                        <td>{category.id}</td>
-                        <td>{category.name}</td>
-                        <td>{category.description}</td>
-                        <td>
-                          <img
-                            src={category.image}
-                            alt={category.name}
-                            className="img-fluid rounded"
-                            style={{
-                              maxWidth: "80px",
-                              height: "80px",
-                              objectFit: "cover",
-                            }}
-                          />
-                        </td>
-                        <td>
-                          <button
-                            className="btn btn-warning btn-sm mx-2"
-                            onClick={() =>
-                              navigate(`/editcategory/${category.id}`)
-                            }
-                          >
-                            <FaEdit />
-                          </button>
-                          <button className="btn btn-danger btn-sm mx-2">
-                            <FaTrashAlt />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="5">No categories found.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5">No categories found.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-            <div className="d-flex justify-content-between mt-3">
-              <button
-                className="btn btn-secondary"
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              <span>
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                className="btn btn-secondary"
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
-            </div>
+        {/* Pagination */}
+        <div className="d-flex justify-content-between mt-3">
+          <button
+            className="btn btn-secondary"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+          >
+            Previous
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="btn btn-secondary"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
+            Next
+          </button>
+        </div>
 
-            <div className="mt-3">
-              <label htmlFor="rowsPerPage" className="form-label">
-                Rows per page:
-              </label>
-              <select
-                id="rowsPerPage"
-                className="form-select"
-                value={rowsPerPage}
-                onChange={(e) => {
-                  setRowsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={40}>40</option>
-              </select>
+        {/* Rows per page */}
+        <div className="mt-3">
+          <label className="form-label">Rows per page:</label>
+          <select
+            className="form-select w-auto"
+            value={rowsPerPage}
+            onChange={(e) => {
+              setRowsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            {[5, 10, 20, 40].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {showDeleteModal && (
+        <div className="modal-overlay">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm Delete</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowDeleteModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to delete this category?</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowDeleteModal(false)}
+                >
+                  Cancel
+                </button>
+                <button className="btn btn-danger" onClick={confirmDelete}>
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </Layout>
   );
 };

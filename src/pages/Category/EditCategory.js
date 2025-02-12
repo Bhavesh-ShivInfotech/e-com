@@ -19,7 +19,7 @@ const EditCategory = () => {
   });
 
   const [newImage, setNewImage] = useState(null);
-
+  const [preview, setPreview] = useState(null);
   const handleChange = (e) => {
     setCategory({ ...category, [e.target.name]: e.target.value });
   };
@@ -28,6 +28,7 @@ const EditCategory = () => {
     const file = e.target.files[0];
     if (file) {
       setNewImage(file);
+      setPreview(URL.createObjectURL(file));
     }
   };
 
@@ -131,6 +132,11 @@ const EditCategory = () => {
               accept="image/*"
               onChange={handleImageChange}
             />
+            {preview && (
+              <div className="image-preview">
+                <img src={preview} alt="Preview" className="preview-img" />
+              </div>
+            )}
           </div>
           <button type="submit" className="btn btn-success" disabled={loading}>
             {loading ? <Spinner size="sm" /> : "Update Category"}
