@@ -1,5 +1,5 @@
 import React from "react";
-import { FaUserEdit, FaTrashAlt } from "react-icons/fa"; // Correct icons
+import { FaUserEdit, FaTrashAlt } from "react-icons/fa";
 
 const CategoryCard = ({ category }) => {
   return (
@@ -13,7 +13,6 @@ const CategoryCard = ({ category }) => {
         <div className="card-body">
           <h5 className="card-title">{category.name}</h5>
           <p className="card-text">{category.description}</p>
-          {/* Action buttons with proper spacing */}
           <div className="action d-flex justify-content-center">
             <button className="btn btn-warning btn-sm mx-4">
               <FaUserEdit />

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "../../Layouts/index";
-import CategoryService from "./CategoryService";
+import API from "../../services/api";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit, FaTrashAlt } from "react-icons/fa"; // Importing icons
+import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import "./Category.css";
 
 const Category = () => {
@@ -11,43 +12,45 @@ const Category = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await CategoryService.getCategories();
-        setCategories(response.data);
-      } catch (error) {
-        console.error("Error fetching categories", error);
+        const response = await API.post(
+          "/api/category/listOfCategory",
+          {
+            model: "Category",
+            limit: 500,
+            condition: {
+              is_archived: false,
+            },
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-        // Mock data for testing
-        setCategories([
-          {
-            id: 1,
-            name: "Category 1",
-            description: "Description 1",
-            image: "image1.jpg",
-          },
-          {
-            id: 2,
-            name: "Category 2",
-            description: "Description 2",
-            image: "image2.jpg",
-          },
-          {
-            id: 3,
-            name: "Category 3",
-            description: "Description 3",
-            image: "image3.jpg",
-          },
-        ]);
+        if (response.data && response.data.data) {
+          setCategories(response.data.data);
+        } else {
+          throw new Error("Invalid data structure received.");
+        }
+      } catch (err) {
+        console.error("Error fetching categories:", {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status,
+        });
       } finally {
         setLoading(false);
       }
     };
+
     fetchCategories();
   }, []);
-
   const filteredCategories = categories.filter(
     (category) =>
       category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -55,21 +58,9 @@ const Category = () => {
   );
 
   const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
-
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
   const currentRows = filteredCategories.slice(indexOfFirstRow, indexOfLastRow);
-
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
-  };
-
-  const handleRowsPerPageChange = (e) => {
-    setRowsPerPage(Number(e.target.value));
-    setCurrentPage(1);
-  };
 
   return (
     <Layout>
@@ -82,8 +73,9 @@ const Category = () => {
           <div className="col-12">
             <div className="d-flex justify-content-between mb-3">
               <button
-                className="btn btn-primary position-absolute"
-                style={{ top: "20px", right: "20px" }}
+                className="btn btn-primary"
+                style={{ position: "absolute", top: "20px", right: "20px" }}
+                onClick={() => navigate("/addcategory")}
               >
                 Add Category
               </button>
@@ -123,17 +115,25 @@ const Category = () => {
                           <img
                             src={category.image}
                             alt={category.name}
-                            width="50"
-                            height="50"
+                            className="img-fluid rounded"
+                            style={{
+                              maxWidth: "80px",
+                              height: "80px",
+                              objectFit: "cover",
+                            }}
                           />
                         </td>
                         <td>
-                          {/* Buttons with icons and spacing */}
-                          <button className="btn btn-warning btn-sm mx-2">
-                            <FaEdit /> {/* Edit Icon */}
+                          <button
+                            className="btn btn-warning btn-sm mx-2"
+                            onClick={() =>
+                              navigate(`/editcategory/${category.id}`)
+                            }
+                          >
+                            <FaEdit />
                           </button>
                           <button className="btn btn-danger btn-sm mx-2">
-                            <FaTrashAlt /> {/* Delete Icon */}
+                            <FaTrashAlt />
                           </button>
                         </td>
                       </tr>
@@ -150,7 +150,7 @@ const Category = () => {
             <div className="d-flex justify-content-between mt-3">
               <button
                 className="btn btn-secondary"
-                onClick={() => handlePageChange(currentPage - 1)}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
               >
                 Previous
@@ -160,7 +160,9 @@ const Category = () => {
               </span>
               <button
                 className="btn btn-secondary"
-                onClick={() => handlePageChange(currentPage + 1)}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
               >
                 Next
@@ -175,7 +177,10 @@ const Category = () => {
                 id="rowsPerPage"
                 className="form-select"
                 value={rowsPerPage}
-                onChange={handleRowsPerPageChange}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
               >
                 <option value={5}>5</option>
                 <option value={10}>10</option>
