@@ -4,7 +4,7 @@ import { Col, Container, Row } from "reactstrap";
 const Footer = () => {
   return (
     <React.Fragment>
-      <footer className="footer position-fixed bottom-0">
+      <footer className="footer position-scroll bottom-0">
         <Container fluid>
           <Row>
             <Col sm={6}>{new Date().getFullYear()} © SHIVINFOTECH.</Col>

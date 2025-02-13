@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, CardBody, CardHeader, Col, Row, Container } from "reactstrap";
 import Chart from "react-apexcharts";
 import API from "../../services/api";
+import "./Revenue1.css";
 
 const Revenue = () => {
   const [graphData, setGraphData] = useState([]);
@@ -69,38 +70,40 @@ const Revenue = () => {
   ];
 
   return (
-    <React.Fragment>
-      <Container fluid className="px-4">
-        <Row className="justify-content-center">
-          <Col lg={12} md={12}>
-            <Card className="shadow-sm">
-              <CardHeader className="border-0 align-items-center d-flex">
-                <h4 className="card-title mb-0 flex-grow-1">
-                  Active Customers
-                </h4>
-              </CardHeader>
+    <div className="page-content chart">
+      <React.Fragment>
+        <Container fluid className="px-4">
+          <Row className="justify-content-center">
+            <Col lg={12} md={12}>
+              <Card className="shadow-sm">
+                <CardHeader className="border-0 align-items-center d-flex">
+                  <h4 className="card-title mb-0 fs-4 fw-bold flex-grow-1">
+                    Active Customers
+                  </h4>
+                </CardHeader>
 
-              <CardBody>
-                {loading ? (
-                  <p className="text-center">Loading...</p>
-                ) : error ? (
-                  <p className="text-danger text-center">{error}</p>
-                ) : (
-                  <div className="w-100">
-                    <Chart
-                      options={chartOptions}
-                      series={chartSeries}
-                      type="line"
-                      height={400}
-                    />
-                  </div>
-                )}
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </React.Fragment>
+                <CardBody>
+                  {loading ? (
+                    <p className="text-center">Loading...</p>
+                  ) : error ? (
+                    <p className="text-danger text-center">{error}</p>
+                  ) : (
+                    <div className="w-100">
+                      <Chart
+                        options={chartOptions}
+                        series={chartSeries}
+                        type="line"
+                        height={400}
+                      />
+                    </div>
+                  )}
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      </React.Fragment>
+    </div>
   );
 };
 

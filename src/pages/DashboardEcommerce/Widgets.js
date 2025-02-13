@@ -80,7 +80,7 @@ const Widgets = () => {
       cardColor: "primary",
       value: cardData.TotalOrder ?? "N/A",
       icon: <ShoppingCartIcon fontSize="large" />,
-      bgcolor: "danger",
+      bgcolor: "primary",
     },
     {
       id: 6,
@@ -92,7 +92,7 @@ const Widgets = () => {
     },
     {
       id: 7,
-      label: "Product",
+      label: "Products",
       cardColor: "success",
       value: cardData.Product ?? "N/A",
       icon: <ShoppingBagIcon fontSize="large" />,
@@ -104,7 +104,7 @@ const Widgets = () => {
       cardColor: "info",
       value: cardData.PendingOrder ?? "N/A",
       icon: <PendingActionsIcon fontSize="large" />,
-      bgcolor: "secondary",
+      bgcolor: "warning",
     },
     {
       id: 9,
