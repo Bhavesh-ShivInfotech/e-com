@@ -1,0 +1,107 @@
+import React, { useEffect, useState } from "react";
+import { Card, CardBody, CardHeader, Col, Row, Container } from "reactstrap";
+import Chart from "react-apexcharts";
+import API from "../../services/api";
+
+const Revenue = () => {
+  const [graphData, setGraphData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchGraphData = async () => {
+      try {
+        const response = await API.get("/api/admin/dashBoard/graphOfCustomer");
+        const graphDataMapped = new Array(12).fill(0);
+        response.data.data.forEach((dataPoint) => {
+          graphDataMapped[dataPoint.month - 1] = dataPoint.count;
+        });
+        setGraphData(graphDataMapped);
+      } catch (err) {
+        setError("Failed to load graph data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGraphData();
+  }, []);
+
+  const chartOptions = {
+    chart: {
+      id: "active-customers",
+      toolbar: { show: false },
+    },
+    xaxis: {
+      categories: [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
+    },
+    stroke: { width: [2, 3], curve: "smooth" },
+    dataLabels: { enabled: false },
+    colors: ["#4b38b3"],
+    markers: { size: 4, hover: { size: 6 } },
+    legend: {
+      show: true,
+      position: "bottom",
+      labels: { colors: "#000", useSeriesColors: false },
+      customLegendItems: ["Active Customers"],
+    },
+  };
+
+  const chartSeries = [
+    { name: "Active Customers", type: "line", data: graphData },
+    {
+      name: "Active Customers",
+      type: "bar",
+      data: graphData,
+    },
+  ];
+
+  return (
+    <React.Fragment>
+      <Container fluid className="px-4">
+        <Row className="justify-content-center">
+          <Col lg={12} md={12}>
+            <Card className="shadow-sm">
+              <CardHeader className="border-0 align-items-center d-flex">
+                <h4 className="card-title mb-0 flex-grow-1">
+                  Active Customers
+                </h4>
+              </CardHeader>
+
+              <CardBody>
+                {loading ? (
+                  <p className="text-center">Loading...</p>
+                ) : error ? (
+                  <p className="text-danger text-center">{error}</p>
+                ) : (
+                  <div className="w-100">
+                    <Chart
+                      options={chartOptions}
+                      series={chartSeries}
+                      type="line"
+                      height={400}
+                    />
+                  </div>
+                )}
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </React.Fragment>
+  );
+};
+
+export default Revenue;
