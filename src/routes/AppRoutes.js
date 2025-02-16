@@ -6,7 +6,8 @@ import Dashboard from "../pages/Dashboard";
 import Category from "../pages/Category/Category";
 import AddCategory from "../pages/Category/AddCategory";
 import EditCategory from "../pages/Category/EditCategory";
-import Product from "../pages/Product";
+import Product from "../pages/Product/Product";
+import AddProduct from "../pages/Product/AddProduct";
 import Report from "../pages/Report";
 
 const AppRoutes = () => {
@@ -20,6 +21,7 @@ const AppRoutes = () => {
       <Route path="/addcategory" element={<AddCategory />} />
       <Route path="/editcategory/:id" element={<EditCategory />} />
       <Route path="/product" element={<Product />} />
+      <Route path="/addproduct" element={<AddProduct />} />
       <Route path="/report" element={<Report />} />
     </Routes>
   );

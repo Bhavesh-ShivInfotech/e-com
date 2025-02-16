@@ -1,0 +1,243 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Col, Container, Row } from "reactstrap";
+import Layout from "../../Layouts/index";
+import API from "../../services/api";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { FaEdit, FaTrashAlt, FaEye } from "react-icons/fa";
+import "./Product.css";
+
+const Product = () => {
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  // const [showDeleteModal, setShowDeleteModal] = useState(false);
+  // const [productToDelete, setProductToDelete] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await API.post("/api/product/listOfProducts");
+        console.log("API Response:", response.data);
+
+        setProducts(
+          Array.isArray(response.data?.data?.item)
+            ? response.data.data.item
+            : []
+        );
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const filteredProducts = products.filter(({ name, description }) =>
+    [name, description].some((field) =>
+      field.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / rowsPerPage);
+  const currentRows = filteredProducts.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  // const handleDeleteClick = (category) => {
+  //   setProductToDelete(category);
+  //   setShowDeleteModal(true);
+  // };
+
+  // const confirmDelete = async () => {
+  //   if (!productToDelete) return;
+
+  //   try {
+  //     await API.put(`/api/category/deleteCategory/${productToDelete.id}`, {
+  //       is_archived: true,
+  //     });
+  //     setProducts(products.filter(({ id }) => id !== productToDelete.id));
+  //   } catch (error) {
+  //     console.error("Error deleting category:", error);
+  //   } finally {
+  //     setShowDeleteModal(false);
+  //     setProductToDelete(null);
+  //   }
+  // };
+
+  return (
+    <React.Fragment>
+      <Layout>
+        <div className="page-content ">
+          <Container fluid className="px-4 mb-4 product-container">
+            <Row>
+              <Col xl={12} md={12}>
+                <h1 className="mb-4">Product</h1>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <input
+                    type="text"
+                    className="form-control w-25"
+                    placeholder="Search by name or description"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => navigate("/addproduct")}
+                  >
+                    Add Product
+                  </button>
+                </div>
+
+                <div className="table-responsive">
+                  <table className="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>Product ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Image</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {loading ? (
+                        <tr>
+                          <td colSpan="6">Loading...</td>
+                        </tr>
+                      ) : currentRows.length > 0 ? (
+                        currentRows.map(
+                          ({ id, name, description, price, image }) => (
+                            <tr key={id}>
+                              <td>{id}</td>
+                              <td>{name}</td>
+                              <td>{description}</td>
+                              <td>{price}</td>
+                              <td>
+                                <img
+                                  src={image}
+                                  alt={name}
+                                  className="img-thumbnail"
+                                  style={{ width: "80px", height: "80px" }}
+                                />
+                              </td>
+                              <td>
+                                <button
+                                  className="btn btn-warning btn-sm mx-1"
+                                  onClick={() => navigate(`/editproduct/${id}`)}
+                                >
+                                  <FaEdit />
+                                </button>
+                                <button
+                                  className="btn btn-danger btn-sm mx-1"
+                                  // onClick={() => handleDeleteClick({ id })}
+                                >
+                                  <FaTrashAlt />
+                                </button>
+                                <button
+                                  className="btn btn-secondary btn-sm mx-1"
+                                  onClick={() => navigate(`/viewproduct/${id}`)}
+                                >
+                                  <FaEye />
+                                </button>
+                              </td>
+                            </tr>
+                          )
+                        )
+                      ) : (
+                        <tr>
+                          <td colSpan="6">No products found.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="d-flex justify-content-between mt-3">
+                  <button
+                    className="btn btn-secondary"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    className="btn btn-secondary"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                  >
+                    Next
+                  </button>
+                </div>
+
+                {/* Rows per page */}
+                <div className="mt-3">
+                  <label className="form-label">Rows per page:</label>
+                  <select
+                    className="form-select w-auto"
+                    value={rowsPerPage}
+                    onChange={(e) => {
+                      setRowsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                  >
+                    {[5, 10, 20, 40].map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+
+        {/* {showDeleteModal && (
+        <div className="modal-overlay">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm Delete</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowDeleteModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to delete this product?</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowDeleteModal(false)}
+                >
+                  Cancel
+                </button>
+                <button className="btn btn-danger" onClick={confirmDelete}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )} */}
+      </Layout>
+    </React.Fragment>
+  );
+};
+
+export default Product;
