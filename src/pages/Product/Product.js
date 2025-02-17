@@ -132,7 +132,7 @@ const Product = () => {
                               <td>
                                 <button
                                   className="btn btn-warning btn-sm mx-1"
-                                  onClick={() => navigate(`/editproduct/${id}`)}
+                                  onClick={() => navigate(`/editProduct/${id}`)}
                                 >
                                   <FaEdit />
                                 </button>

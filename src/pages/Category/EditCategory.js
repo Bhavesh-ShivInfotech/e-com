@@ -54,7 +54,7 @@ const EditCategory = () => {
         }
       );
 
-      if (response.data.success) {
+      if (response?.data?.status === "success") {
         toast.success(
           response.data.message || "Category updated successfully!",
           {

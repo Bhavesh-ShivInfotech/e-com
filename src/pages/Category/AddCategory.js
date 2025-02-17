@@ -56,7 +56,7 @@ const AddCategory = () => {
         },
       });
 
-      if (response.data.success) {
+      if (response?.data?.status === "success") {
         toast.success(response.data.message || "Category added successfully!", {
           position: "top-right",
           autoClose: 3000,

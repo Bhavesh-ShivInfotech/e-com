@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Col, Container, Row, Form, Button } from "react-bootstrap";
 import Layout from "../../Layouts/index";
 import API from "../../services/api";
@@ -9,30 +9,49 @@ import { Spinner } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Product.css";
 
-const AddProduct = () => {
+const EditProduct = () => {
+  const {
+    id,
+    is_prescription,
+    vendor_id,
+    name,
+    description,
+    category_id,
+    price,
+    quantity,
+    metaTagTitle,
+    metaTagDescription,
+    metaTagKeywords,
+    composition,
+    presentation,
+    storage,
+    indication,
+    dose,
+    selectedImage,
+  } = useParams();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("General");
   const [categories, setCategories] = useState([]);
   const [product, setProduct] = useState({
-    is_prescription: true,
-    vendor_id: 2,
-    name: "",
-    description: "",
-    category_id: "",
-    price: "",
-    quantity: "",
-    metaTagTitle: "",
-    metaTagDescription: "",
-    metaTagKeywords: "",
-    composition: "",
-    presentation: "",
-    storage: "",
-    indication: "",
-    dose: "",
-    selectedImage: null,
+    is_prescription: is_prescription || true,
+    vendor_id: vendor_id || 2,
+    name: name || "",
+    description: description || "",
+    category_id: category_id ? Number(category_id) : undefined,
+    price: price || "",
+    quantity: quantity || "",
+    metaTagTitle: metaTagTitle || "",
+    metaTagDescription: metaTagDescription || "",
+    metaTagKeywords: metaTagKeywords || "",
+    composition: composition || "",
+    presentation: presentation || "",
+    storage: storage || "",
+    indication: indication || "",
+    dose: dose || "",
+    selectedImage: selectedImage || "",
   });
-
+  const [newImage, setNewImage] = useState(null);
   const [preview, setPreview] = useState(null);
 
   useEffect(() => {
@@ -56,54 +75,81 @@ const AddProduct = () => {
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProduct({ ...product, [name]: value });
+    setProduct({ ...product, [e.target.name]: e.target.value });
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProduct({ ...product, selectedImage: file });
-      setPreview(URL.createObjectURL(file));
+      const formData = new FormData();
+      formData.append("image", file);
+      try {
+        const response = await API.post("/api/vendor/productImage", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        if (response?.data?.status === "success") {
+          toast.success(
+            response.data.message || "Image uploaded successfully!"
+          );
+          setNewImage(response?.data?.data?.[0]);
+          setPreview(URL.createObjectURL(file));
+        } else {
+          toast.error(response?.data?.message || "Failed to upload image.");
+        }
+      } catch (error) {
+        toast.error("Something went wrong! Please try again.");
+      }
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    if (
-      !product.name ||
-      !product.description ||
-      !product.selectedImage ||
-      !product.category_id
-    ) {
-      toast.error("Please fill all required fields!", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      setLoading(false);
-      return;
+    const formData = new FormData();
+    formData.append("is_prescription", product.is_prescription);
+    formData.append("vendor_id", product.vendor_id);
+    formData.append("name", product.name);
+    formData.append("description", product.description);
+    formData.append("category_id", Number(product.category_id));
+    formData.append("price", product.price);
+    formData.append("quantity", product.quantity);
+    formData.append("metaTagTitle", product.metaTagTitle);
+    formData.append("metaTagDescription", product.metaTagDescription);
+    formData.append("metaTagKeywords", product.metaTagKeywords);
+    formData.append("composition", product.composition);
+    formData.append("presentation", product.presentation);
+    formData.append("storage", product.storage);
+    formData.append("indication", product.indication);
+    formData.append("dose", product.dose);
+
+    if (newImage) {
+      formData.append("selectedImage", newImage);
+    } else {
+      formData.append("selectedImage", product.selectedImage);
     }
 
-    const formData = new FormData();
-    Object.keys(product).forEach((key) => {
-      formData.append(key, product[key]);
-    });
-
     try {
-      const response = await API.post("/api/product/addProduct", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await API.put(
+        `api/product/editProduct/${id}`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
       if (response?.data?.status === "success") {
-        toast.success(response.data.message || "Product added successfully!", {
-          position: "top-right",
-          autoClose: 3000,
-        });
+        toast.success(
+          response.data.message || "Product updated successfully!",
+          {
+            position: "top-right",
+            autoClose: 3000,
+          }
+        );
         navigate("/product");
       } else {
-        toast.error(response?.data?.message || "Failed to add product.", {
+        toast.error(response?.data?.message || "Failed to update product.", {
           position: "top-right",
           autoClose: 3000,
         });
@@ -111,11 +157,15 @@ const AddProduct = () => {
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
-          "Something went wrong! Please try again.",
+          "Error updating product. Please try again.",
         {
           position: "top-right",
           autoClose: 3000,
         }
+      );
+      console.error(
+        "Error Updating product:",
+        error.response?.data || error.message
       );
     } finally {
       setLoading(false);
@@ -126,10 +176,10 @@ const AddProduct = () => {
     <React.Fragment>
       <Layout>
         <div className="page-content ">
-          <Container fluid className="px-4 mb-4 addproduct-container">
+          <Container fluid className="px-4 mb-4 editproduct-container">
             <Row className="align-items-center mb-4">
               <Col>
-                <h2 className="mb-0">Add Product</h2>
+                <h2 className="mb-0">Edit Product</h2>
               </Col>
               <Col className="text-end">
                 <Button variant="secondary" onClick={() => navigate(-1)}>
@@ -154,7 +204,7 @@ const AddProduct = () => {
                     </Button>
                   ))}
                 </div>
-                <Form onSubmit={handleSubmit} encType="multipart/form-data">
+                <Form onSubmit={handleUpdate} encType="multipart/form-data">
                   {activeTab === "General" && (
                     <div className="section p-4 border rounded">
                       <h4 className="mb-4">General Information</h4>
@@ -177,8 +227,12 @@ const AddProduct = () => {
                             <Form.Select
                               name="category_id"
                               value={product.category_id}
-                              onChange={handleChange}
-                              required
+                              onChange={(e) =>
+                                setProduct({
+                                  ...product,
+                                  category_id: Number(e.target.value),
+                                })
+                              }
                             >
                               <option value="">Select Category</option>
                               {categories.map((cat) => (
@@ -351,7 +405,7 @@ const AddProduct = () => {
                               name="shelfLife"
                               value={product.shelfLife}
                               onChange={handleChange}
-                              required
+                              disabled
                             />
                           </Form.Group>
                         </Col>
@@ -366,21 +420,30 @@ const AddProduct = () => {
                         <Col md={12}>
                           <Form.Group className="mb-3">
                             <Form.Label>Upload Image</Form.Label>
+                            {product.selectedImage && !newImage && (
+                              <div className="mb-2">
+                                <img
+                                  src={product.selectedImage}
+                                  alt="product"
+                                  className="img-thumbnail"
+                                  style={{
+                                    width: "150px",
+                                    height: "150px",
+                                    objectFit: "cover",
+                                  }}
+                                />
+                              </div>
+                            )}
                             <Form.Control
                               type="file"
                               accept="image/*"
                               onChange={handleImageChange}
-                              required
                             />
                             {preview && (
                               <img
                                 src={preview}
                                 alt="Preview"
                                 className="preview-img mt-3"
-                                style={{
-                                  maxWidth: "200px",
-                                  borderRadius: "8px",
-                                }}
                               />
                             )}
                           </Form.Group>
@@ -392,7 +455,7 @@ const AddProduct = () => {
                         className="mt-3"
                         disabled={loading}
                       >
-                        {loading ? <Spinner size="sm" /> : "Save Product"}
+                        {loading ? <Spinner size="sm" /> : "Update Product"}
                       </Button>
                     </div>
                   )}
@@ -407,4 +470,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default EditProduct;
