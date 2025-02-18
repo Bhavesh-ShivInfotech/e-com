@@ -70,7 +70,7 @@ const Revenue = () => {
   ];
 
   return (
-    <div className="page-content chart">
+    <div className="page-content chart" style={{ paddingBottom: "0" }}>
       <React.Fragment>
         <Container fluid className="px-4">
           <Row className="justify-content-center">

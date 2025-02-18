@@ -3,6 +3,7 @@ import API from "../../services/api";
 import { Card, CardBody, CardHeader, Col, Container, Row } from "reactstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import BaseTable from "./BaseTable2";
+import Pagination from "../../Components/Common/Pagination";
 import "./Table.css";
 const ListOfOrder = () => {
   const [customers, setCustomers] = useState([]);
@@ -63,13 +64,12 @@ const ListOfOrder = () => {
   };
 
   const filteredCustomers = customers.filter((customer) => customer.userName);
-
   const totalPages = Math.ceil(filteredCustomers.length / rowsPerPage);
 
-  const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredCustomers.slice(indexOfFirstRow, indexOfLastRow);
-
+  const currentRows = filteredCustomers.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
   const getStatusClass = (status) => {
     switch (status.toLowerCase()) {
       case "pending":
@@ -118,11 +118,13 @@ const ListOfOrder = () => {
                     onSelectAll={handleSelectAll}
                     isLoading={loading}
                     error={error}
-                    rowsPerPage={rowsPerPage}
-                    onRowsPerPageChange={handleRowsPerPageChange}
-                    currentPage={currentPage}
+                  />
+                  <Pagination
                     totalPages={totalPages}
-                    onPageChange={handlePageChange}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    rowsPerPage={rowsPerPage}
+                    handleRowsPerPageChange={handleRowsPerPageChange}
                   />
                 </CardBody>
               </Card>

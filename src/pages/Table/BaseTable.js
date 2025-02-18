@@ -18,7 +18,6 @@ const BaseTable = ({
     return formattedDate;
   };
 
-  // Add checks for undefined or null props
   const safeColumns = columns || [];
   const safeData = data || [];
 
@@ -38,7 +37,7 @@ const BaseTable = ({
           {error ? (
             <tr>
               <td
-                colSpan={safeColumns.length + 1}
+                colSpan={safeColumns.length}
                 className="text-danger text-center"
               >
                 {error}
@@ -61,7 +60,7 @@ const BaseTable = ({
           ) : (
             <tr>
               <td
-                colSpan={safeColumns.length + 1}
+                colSpan={safeColumns.length}
                 className="text-muted text-center"
               >
                 No data found.

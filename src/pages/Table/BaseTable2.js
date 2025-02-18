@@ -13,9 +13,6 @@ const BaseTable = ({
   error,
   rowsPerPage,
   onRowsPerPageChange,
-  currentPage,
-  totalPages,
-  onPageChange,
 }) => {
   return (
     <div className="table-responsive">
@@ -36,17 +33,8 @@ const BaseTable = ({
         <tbody>
           {error ? (
             <tr>
-              <td
-                colSpan={columns.length + 1}
-                className="text-danger text-center"
-              >
+              <td colSpan={columns.length} className="text-danger text-center">
                 {error}
-              </td>
-            </tr>
-          ) : isLoading ? (
-            <tr>
-              <td colSpan={columns.length + 1} className="text-center">
-                Loading...
               </td>
             </tr>
           ) : data.length > 0 ? (
@@ -59,54 +47,13 @@ const BaseTable = ({
             ))
           ) : (
             <tr>
-              <td
-                colSpan={columns.length + 1}
-                className="text-muted text-center"
-              >
+              <td colSpan={columns.length} className="text-muted text-center">
                 No data available
               </td>
             </tr>
           )}
         </tbody>
       </Table>
-
-      {/* Pagination Controls */}
-      <div className="d-flex justify-content-between mt-3">
-        <button
-          className="btn btn-secondary"
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="btn btn-secondary"
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
-      </div>
-
-      {/* Rows per page selector */}
-      <div className="mt-3">
-        <label htmlFor="rowsPerPage" className="form-label">
-          Rows per page:
-        </label>
-        <select
-          id="rowsPerPage"
-          className="form-select w-auto"
-          value={rowsPerPage}
-          onChange={onRowsPerPageChange}
-        >
-          <option value={10}>10</option>
-          <option value={20}>20</option>
-          <option value={50}>50</option>
-        </select>
-      </div>
     </div>
   );
 };
@@ -121,9 +68,6 @@ BaseTable.propTypes = {
   error: PropTypes.string,
   rowsPerPage: PropTypes.number.isRequired,
   onRowsPerPageChange: PropTypes.func.isRequired,
-  currentPage: PropTypes.number.isRequired,
-  totalPages: PropTypes.number.isRequired,
-  onPageChange: PropTypes.func.isRequired,
 };
 
 BaseTable.defaultProps = {

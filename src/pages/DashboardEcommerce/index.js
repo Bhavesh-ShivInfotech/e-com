@@ -4,8 +4,6 @@ import Widget from "./Widgets";
 import Section from "./Section";
 
 const DashboardEcommerce = () => {
-  // document.title = "Dashboard | Velzon - React Admin & Dashboard Template";
-
   const [rightColumn, setRightColumn] = useState(true);
   const toggleRightColumn = () => {
     setRightColumn(!rightColumn);
@@ -13,8 +11,8 @@ const DashboardEcommerce = () => {
 
   return (
     <React.Fragment>
-      <div className="page-content">
-        <Container fluid>
+      <div className="page-content" style={{ paddingBottom: "0" }}>
+        <Container fluid className="px-4">
           <Row>
             <Col>
               <div className="h-100">

@@ -70,7 +70,7 @@ const RecentlyJoinedCustomers = () => {
 
   return (
     <React.Fragment>
-      <div className="page-content Table">
+      <div className="page-content Table" style={{ paddingBottom: "0" }}>
         <Container fluid className="px-4">
           <Row>
             <Col xl={12} md={12}>
