@@ -9,6 +9,7 @@ import EditCategory from "../pages/Category/EditCategory";
 import Product from "../pages/Product/Product";
 import AddProduct from "../pages/Product/AddProduct";
 import EditProduct from "../pages/Product/EditProduct";
+import ViewProduct from "../pages/Product/ViewProduct";
 import Report from "../pages/Report";
 
 const AppRoutes = () => {
@@ -24,6 +25,7 @@ const AppRoutes = () => {
       <Route path="/product" element={<Product />} />
       <Route path="/addproduct" element={<AddProduct />} />
       <Route path="/editProduct/:id" element={<EditProduct />} />
+      <Route path="/viewProduct/:id" element={<ViewProduct />} />
       <Route path="/report" element={<Report />} />
     </Routes>
   );

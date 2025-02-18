@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Col, Container, Row } from "reactstrap";
 import Layout from "../../Layouts/index";
 import API from "../../services/api";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -84,74 +85,90 @@ const EditCategory = () => {
   };
 
   return (
-    <Layout>
-      <div className="container editcategory-container">
-        <h2>Edit Category</h2>
-        <form onSubmit={handleUpdate} encType="multipart/form-data">
-          <div className="mb-3 mt-4">
-            <label className="form-label">Category Name</label>
-            <input
-              type="text"
-              className="form-control"
-              name="name"
-              value={category.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Description</label>
-            <textarea
-              type="text"
-              className="form-control"
-              name="description"
-              value={category.description}
-              onChange={handleChange}
-              required
-            ></textarea>
-          </div>
-          <div className="mb-4">
-            <label className="form-label">Category Image</label>
-            {category.image && !newImage && (
-              <div className="mb-2">
-                <img
-                  src={category.image}
-                  alt="Category"
-                  className="img-thumbnail"
-                  style={{
-                    width: "150px",
-                    height: "150px",
-                    objectFit: "cover",
-                  }}
-                />
-              </div>
-            )}
-            <input
-              type="file"
-              className="form-control"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-            {preview && (
-              <div className="image-preview">
-                <img src={preview} alt="Preview" className="preview-img" />
-              </div>
-            )}
-          </div>
-          <button type="submit" className="btn btn-success" disabled={loading}>
-            {loading ? <Spinner size="sm" /> : "Update Category"}
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary ms-2"
-            onClick={() => navigate("/category")}
-          >
-            Cancel
-          </button>
-        </form>
-      </div>
-      <ToastContainer position="top-right" autoClose={3000} />
-    </Layout>
+    <React.Fragment>
+      <Layout>
+        <div className="page-content ">
+          <Container fluid className="px-4 mb-4 editcategory-container">
+            <Row>
+              <Col xl={12} md={12}>
+                <h2>Edit Category</h2>
+                <form onSubmit={handleUpdate} encType="multipart/form-data">
+                  <div className="mb-3 mt-4">
+                    <label className="form-label">Category Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="name"
+                      value={category.name}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Description</label>
+                    <textarea
+                      type="text"
+                      className="form-control"
+                      name="description"
+                      value={category.description}
+                      onChange={handleChange}
+                      required
+                    ></textarea>
+                  </div>
+                  <div className="mb-4">
+                    <label className="form-label">Category Image</label>
+                    {category.image && !newImage && (
+                      <div className="mb-2">
+                        <img
+                          src={category.image}
+                          alt="Category"
+                          className="img-thumbnail"
+                          style={{
+                            width: "150px",
+                            height: "150px",
+                            objectFit: "cover",
+                          }}
+                        />
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      className="form-control"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                    />
+                    {preview && (
+                      <div className="image-preview">
+                        <img
+                          src={preview}
+                          alt="Preview"
+                          className="preview-img"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="submit"
+                    className="btn btn-success"
+                    disabled={loading}
+                  >
+                    {loading ? <Spinner size="sm" /> : "Update Category"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary ms-2"
+                    onClick={() => navigate("/category")}
+                  >
+                    Cancel
+                  </button>
+                </form>
+                <ToastContainer position="top-right" autoClose={3000} />
+              </Col>
+            </Row>
+          </Container>
+        </div>
+      </Layout>
+    </React.Fragment>
   );
 };
 

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Col, Container, Row } from "reactstrap";
 import Layout from "../../Layouts/index";
 import API from "../../services/api";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaEdit, FaTrashAlt, FaEye } from "react-icons/fa";
 import "./Product.css";
@@ -13,8 +15,8 @@ const Product = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  // const [showDeleteModal, setShowDeleteModal] = useState(false);
-  // const [productToDelete, setProductToDelete] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,26 +53,40 @@ const Product = () => {
     currentPage * rowsPerPage
   );
 
-  // const handleDeleteClick = (category) => {
-  //   setProductToDelete(category);
-  //   setShowDeleteModal(true);
-  // };
+  const handleDeleteClick = (category) => {
+    setProductToDelete(category);
+    setShowDeleteModal(true);
+  };
 
-  // const confirmDelete = async () => {
-  //   if (!productToDelete) return;
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
 
-  //   try {
-  //     await API.put(`/api/category/deleteCategory/${productToDelete.id}`, {
-  //       is_archived: true,
-  //     });
-  //     setProducts(products.filter(({ id }) => id !== productToDelete.id));
-  //   } catch (error) {
-  //     console.error("Error deleting category:", error);
-  //   } finally {
-  //     setShowDeleteModal(false);
-  //     setProductToDelete(null);
-  //   }
-  // };
+    try {
+      const response = await API.put(
+        `/api/product/deleteProduct/${productToDelete.id}`,
+        {
+          is_archived: true,
+        }
+      );
+      if (response?.data?.status === "success") {
+        toast.success(
+          response?.data?.message || "Product deleted successfully!",
+          {
+            position: "top-right",
+            autoClose: 3000,
+          }
+        );
+        setProducts(products.filter(({ id }) => id !== productToDelete.id));
+      } else {
+        toast.error(response?.data?.message || "Failed to delete product.");
+      }
+    } catch (error) {
+      toast.error(error.response?.data || error.message);
+    } finally {
+      setShowDeleteModal(false);
+      setProductToDelete(null);
+    }
+  };
 
   return (
     <React.Fragment>
@@ -138,13 +154,13 @@ const Product = () => {
                                 </button>
                                 <button
                                   className="btn btn-danger btn-sm mx-1"
-                                  // onClick={() => handleDeleteClick({ id })}
+                                  onClick={() => handleDeleteClick({ id })}
                                 >
                                   <FaTrashAlt />
                                 </button>
                                 <button
                                   className="btn btn-secondary btn-sm mx-1"
-                                  onClick={() => navigate(`/viewproduct/${id}`)}
+                                  onClick={() => navigate(`/viewProduct/${id}`)}
                                 >
                                   <FaEye />
                                 </button>
@@ -200,41 +216,42 @@ const Product = () => {
                     ))}
                   </select>
                 </div>
+                <ToastContainer position="top-right" autoClose={3000} />
               </Col>
             </Row>
           </Container>
         </div>
 
-        {/* {showDeleteModal && (
-        <div className="modal-overlay">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirm Delete</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowDeleteModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <p>Are you sure you want to delete this product?</p>
-              </div>
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setShowDeleteModal(false)}
-                >
-                  Cancel
-                </button>
-                <button className="btn btn-danger" onClick={confirmDelete}>
-                  Delete
-                </button>
+        {showDeleteModal && (
+          <div className="modal-overlay">
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Confirm Delete</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowDeleteModal(false)}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <p>Are you sure you want to delete this product?</p>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setShowDeleteModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button className="btn btn-danger" onClick={confirmDelete}>
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )} */}
+        )}
       </Layout>
     </React.Fragment>
   );
