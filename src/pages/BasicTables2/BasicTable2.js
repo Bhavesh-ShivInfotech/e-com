@@ -98,99 +98,89 @@ const ListOfOrder = () => {
                   </h5>
                 </CardHeader>
                 <CardBody>
-                  {loading ? (
-                    <p className="text-center">Loading...</p>
-                  ) : (
-                    <div className="table-responsive">
-                      <table className="table align-middle table-nowrap table-striped-columns table-hover mb-0">
-                        <thead className="table-light">
+                  <div className="table-responsive">
+                    <table className="table align-middle table-nowrap table-striped-columns table-hover mb-0">
+                      <thead className="table-light">
+                        <tr>
+                          <th scope="col">
+                            <div className="form-check">
+                              <input
+                                className="form-check-input"
+                                type="checkbox"
+                                id="selectAll"
+                                onChange={handleSelectAll}
+                                checked={
+                                  selectedOrders.length === customers.length
+                                }
+                              />
+                              <label
+                                className="form-check-label"
+                                htmlFor="selectAll"
+                              ></label>
+                            </div>
+                          </th>
+                          <th scope="col">Order ID</th>
+                          <th scope="col">First Name</th>
+                          <th scope="col">Last Name</th>
+                          <th scope="col">Email ID</th>
+                          <th scope="col">Total Amount</th>
+                          <th scope="col">Status</th>
+                          <th scope="col">Discount</th>
+                          <th scope="col">Tax</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {error ? (
                           <tr>
-                            <th scope="col">
-                              <div className="form-check">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="selectAll"
-                                  onChange={handleSelectAll}
-                                  checked={
-                                    selectedOrders.length === customers.length
-                                  }
-                                />
-                                <label
-                                  className="form-check-label"
-                                  htmlFor="selectAll"
-                                ></label>
-                              </div>
-                            </th>
-                            <th scope="col">Order ID</th>
-                            <th scope="col">First Name</th>
-                            <th scope="col">Last Name</th>
-                            <th scope="col">Email ID</th>
-                            <th scope="col">Total Amount</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Discount</th>
-                            <th scope="col">Tax</th>
+                            <td colSpan="9" className="text-danger text-center">
+                              {error}
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {error ? (
-                            <tr>
-                              <td
-                                colSpan="9"
-                                className="text-danger text-center"
-                              >
-                                {error}
+                        ) : currentRows.length > 0 ? (
+                          currentRows.map((customer) => (
+                            <tr key={customer.order_id}>
+                              <td>
+                                <div className="form-check">
+                                  <input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    checked={selectedOrders.includes(
+                                      customer.order_id
+                                    )}
+                                    onChange={() =>
+                                      handleSelectOrder(customer.order_id)
+                                    }
+                                  />
+                                </div>
                               </td>
-                            </tr>
-                          ) : currentRows.length > 0 ? (
-                            currentRows.map((customer) => (
-                              <tr key={customer.order_id}>
-                                <td>
-                                  <div className="form-check">
-                                    <input
-                                      className="form-check-input"
-                                      type="checkbox"
-                                      checked={selectedOrders.includes(
-                                        customer.order_id
-                                      )}
-                                      onChange={() =>
-                                        handleSelectOrder(customer.order_id)
-                                      }
-                                    />
-                                  </div>
-                                </td>
-                                <td>{customer.order_id}</td>
-                                <td>{customer.userName || "N/A"}</td>
-                                <td>{customer.lastName || "N/A"}</td>
-                                <td>{customer.email || "N/A"}</td>
-                                <td>{customer.total_amount}</td>
-                                <td>
-                                  <span
-                                    className={`badge rounded-pill ${getStatusClass(
-                                      customer.status
-                                    )}`}
-                                  >
-                                    {customer.status}
-                                  </span>
-                                </td>
-                                <td>{customer.discount}</td>
-                                <td>{customer.tax || "N/A"}</td>
-                              </tr>
-                            ))
-                          ) : (
-                            <tr>
-                              <td
-                                colSpan="9"
-                                className="text-muted text-center"
-                              >
-                                No customers found.
+                              <td>{customer.order_id}</td>
+                              <td>{customer.userName || "N/A"}</td>
+                              <td>{customer.lastName || "N/A"}</td>
+                              <td>{customer.email || "N/A"}</td>
+                              <td>{customer.total_amount}</td>
+                              <td>
+                                <span
+                                  className={`badge rounded-pill ${getStatusClass(
+                                    customer.status
+                                  )}`}
+                                >
+                                  {customer.status}
+                                </span>
                               </td>
+                              <td>{customer.discount}</td>
+                              <td>{customer.tax || "N/A"}</td>
                             </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="9" className="text-muted text-center">
+                              No customers found.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
 
                   {/* Pagination Controls */}
                   <div className="d-flex justify-content-between mt-3">

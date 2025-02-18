@@ -83,20 +83,14 @@ const Revenue = () => {
                 </CardHeader>
 
                 <CardBody>
-                  {loading ? (
-                    <p className="text-center">Loading...</p>
-                  ) : error ? (
-                    <p className="text-danger text-center">{error}</p>
-                  ) : (
-                    <div className="w-100">
-                      <Chart
-                        options={chartOptions}
-                        series={chartSeries}
-                        type="line"
-                        height={400}
-                      />
-                    </div>
-                  )}
+                  <div className="w-100">
+                    <Chart
+                      options={chartOptions}
+                      series={chartSeries}
+                      type="line"
+                      height={400}
+                    />
+                  </div>
                 </CardBody>
               </Card>
             </Col>

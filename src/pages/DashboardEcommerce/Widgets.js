@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardBody, Col, Row } from "reactstrap";
 import API from "../../services/api";
+import BaseCard from "./BaseCard";
 
 import LocalPharmacyIcon from "@mui/icons-material/LocalPharmacy";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
@@ -126,45 +127,22 @@ const Widgets = () => {
   return (
     <div>
       {loading ? (
-        <p className="text-center">Loading...</p>
+        <p>Loading...</p>
       ) : error ? (
-        <p className="text-danger text-center">{error}</p>
+        <p style={{ color: "red" }}>{error}</p>
       ) : (
-        <React.Fragment>
-          <Row>
-            {cardsInfo.map((card) => (
-              <Col Col xl={3} lg={3} md={4} sm={6} xs={12} key={card.id}>
-                <Card className="card-animate">
-                  <CardBody>
-                    <div className="d-flex align-items-center ">
-                      <div className="flex-grow-1 overflow-hidden">
-                        <p className="text-uppercase fw-medium text-muted text-truncate mb-0">
-                          {card.label}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="d-flex align-items-end justify-content-between mt-4">
-                      <div>
-                        <h4 className="fs-22 fw-semibold ff-secondary mb-4">
-                          {card.value}
-                        </h4>
-                      </div>
-                      <div className="avatar-sm flex-shrink-0">
-                        <span
-                          className={
-                            "avatar-title rounded fs-3 bg-" + card.bgcolor
-                          }
-                        >
-                          {card.icon}
-                        </span>
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </React.Fragment>
+        <Row>
+          {cardsInfo.map((card) => (
+            <Col xl={3} lg={3} md={4} sm={6} xs={12} key={card.id}>
+              <BaseCard
+                label={card.label}
+                value={card.value}
+                icon={card.icon}
+                bgcolor={card.bgcolor}
+              />
+            </Col>
+          ))}
+        </Row>
       )}
     </div>
   );
