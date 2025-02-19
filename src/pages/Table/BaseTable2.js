@@ -9,15 +9,13 @@ const BaseTable = ({
   selectedRows,
   onSelectRow,
   onSelectAll,
+  getStatusClass,
   isLoading,
   error,
-  rowsPerPage,
-  onRowsPerPageChange,
 }) => {
   return (
     <div className="table-responsive">
       <Table
-        hover
         responsive
         className="align-middle table-nowrap table-striped-columns"
       >
@@ -41,7 +39,15 @@ const BaseTable = ({
             data.map((row) => (
               <tr key={row.id}>
                 {columns.map((col) => (
-                  <td key={col.key}>{row[col.key]}</td>
+                  <td key={col.key}>
+                    {col.key === "status" ? (
+                      <span className={getStatusClass(row[col.key])}>
+                        {row[col.key]}
+                      </span>
+                    ) : (
+                      row[col.key]
+                    )}
+                  </td>
                 ))}
               </tr>
             ))
@@ -64,10 +70,9 @@ BaseTable.propTypes = {
   selectedRows: PropTypes.array.isRequired,
   onSelectRow: PropTypes.func.isRequired,
   onSelectAll: PropTypes.func.isRequired,
+  getStatusClass: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
   error: PropTypes.string,
-  rowsPerPage: PropTypes.number.isRequired,
-  onRowsPerPageChange: PropTypes.func.isRequired,
 };
 
 BaseTable.defaultProps = {

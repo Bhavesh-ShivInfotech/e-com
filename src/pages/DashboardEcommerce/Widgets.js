@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardBody, Col, Row } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import API from "../../services/api";
 import BaseCard from "./BaseCard";
 

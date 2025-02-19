@@ -4,6 +4,7 @@ import { Card, CardBody, CardHeader, Col, Container, Row } from "reactstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import BaseTable from "./BaseTable2";
 import Pagination from "../../Components/Common/Pagination";
+import PreviewCardHeader from "../../Components/Common/PreviewCardHeader";
 import "./Table.css";
 const ListOfOrder = () => {
   const [customers, setCustomers] = useState([]);
@@ -73,16 +74,16 @@ const ListOfOrder = () => {
   const getStatusClass = (status) => {
     switch (status.toLowerCase()) {
       case "pending":
-        return "bg-danger text-white";
+        return "badge bg-danger";
       case "success":
-        return "bg-info text-white";
+      case "confirmed":
+        return "badge bg-success";
       case "rejected":
       case "approve":
-      case "confirmed":
       case "failed":
-        return "bg-warning text-dark";
+        return "badge bg-warning";
       default:
-        return "bg-secondary text-white";
+        return "badge bg-secondary";
     }
   };
 
@@ -101,14 +102,10 @@ const ListOfOrder = () => {
     <React.Fragment>
       <div className="page-content Table">
         <Container fluid className="px-4">
-          <Row>
+          <Row className="justify-content-center">
             <Col xl={12} md={12}>
-              <Card className="shadow-lg bg-white rounded">
-                <CardHeader className="align-items-center d-flex">
-                  <h5 className="card-title mb-0 fw-bold fs-4 flex-grow-1">
-                    List Of Orders
-                  </h5>
-                </CardHeader>
+              <Card>
+                <PreviewCardHeader title="List Of Orders" />
                 <CardBody>
                   <BaseTable
                     columns={columns}
@@ -116,6 +113,7 @@ const ListOfOrder = () => {
                     selectedRows={selectedOrders}
                     onSelectRow={handleSelectOrder}
                     onSelectAll={handleSelectAll}
+                    getStatusClass={getStatusClass}
                     isLoading={loading}
                     error={error}
                   />

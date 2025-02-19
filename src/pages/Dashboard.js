@@ -4,7 +4,6 @@ import Layout from "../Layouts/index";
 import Cards from "./DashboardEcommerce/index";
 import Revenue from "./DashboardEcommerce/Revenue";
 import RecentlyJoinedCustomers from "./Table/RecentlyJoinedCustomers";
-// import BasicTables2 from "./BasicTables2/BasicTable2";
 import ListOfOrder from "./Table/ListOfOrder";
 import "../../src/index.css";
 const Spinner = () => {
@@ -34,7 +33,6 @@ const Dashboard = () => {
           <Cards />
           <Revenue />
           <RecentlyJoinedCustomers />
-          {/* <BasicTables2 /> */}
           <ListOfOrder />
         </>
       )}

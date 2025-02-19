@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Col, Container, Row } from "reactstrap";
+import { Col, Container, Row, Card, CardHeader } from "reactstrap";
 import { ClipLoader } from "react-spinners";
 import Layout from "../../Layouts/index";
 import API from "../../services/api";
@@ -107,119 +107,123 @@ const Category = () => {
           <div className="page-content ">
             <Container fluid className="px-4 mb-4 category-container">
               <Row>
-                <Col xl={12} md={12}>
-                  <h1 className="mb-4">Category</h1>
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <input
-                      type="text"
-                      className="form-control w-25"
-                      placeholder="Search by name or description"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => navigate("/addcategory")}
-                    >
-                      Add Category
-                    </button>
-                  </div>
+                <Col xl={12} md={12} lg={12}>
+                  <Card>
+                    <CardHeader>
+                      <h4 className="card-title mb-0">Category</h4>
+                    </CardHeader>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <input
+                        type="text"
+                        className="form-control w-25"
+                        placeholder="Search by name or description"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => navigate("/addcategory")}
+                      >
+                        Add Category
+                      </button>
+                    </div>
 
-                  <div className="table-responsive">
-                    <table className="table table-striped">
-                      <thead>
-                        <tr>
-                          <th>ID</th>
-                          <th>Name</th>
-                          <th>Description</th>
-                          <th>Image</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currentRows.length > 0 ? (
-                          currentRows.map(
-                            ({ id, name, description, image }) => (
-                              <tr key={id}>
-                                <td>{id}</td>
-                                <td>{name}</td>
-                                <td>{description}</td>
-                                <td>
-                                  <img
-                                    src={image}
-                                    alt={name}
-                                    className="img-thumbnail"
-                                    style={{ width: "80px", height: "80px" }}
-                                  />
-                                </td>
-                                <td>
-                                  <button
-                                    className="btn btn-warning btn-sm mx-1"
-                                    onClick={() =>
-                                      navigate(`/editcategory/${id}`)
-                                    }
-                                  >
-                                    <FaEdit />
-                                  </button>
-                                  <button
-                                    className="btn btn-danger btn-sm mx-1"
-                                    onClick={() => handleDeleteClick({ id })}
-                                  >
-                                    <FaTrashAlt />
-                                  </button>
-                                </td>
-                              </tr>
-                            )
-                          )
-                        ) : (
+                    <div className="table-responsive">
+                      <table className="table table-striped">
+                        <thead>
                           <tr>
-                            <td colSpan="5">No categories found.</td>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Image</th>
+                            <th>Action</th>
                           </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody>
+                          {currentRows.length > 0 ? (
+                            currentRows.map(
+                              ({ id, name, description, image }) => (
+                                <tr key={id}>
+                                  <td>{id}</td>
+                                  <td>{name}</td>
+                                  <td>{description}</td>
+                                  <td>
+                                    <img
+                                      src={image}
+                                      alt={name}
+                                      className="img-thumbnail"
+                                      style={{ width: "80px", height: "80px" }}
+                                    />
+                                  </td>
+                                  <td>
+                                    <button
+                                      className="btn btn-warning btn-sm mx-1"
+                                      onClick={() =>
+                                        navigate(`/editcategory/${id}`)
+                                      }
+                                    >
+                                      <FaEdit />
+                                    </button>
+                                    <button
+                                      className="btn btn-danger btn-sm mx-1"
+                                      onClick={() => handleDeleteClick({ id })}
+                                    >
+                                      <FaTrashAlt />
+                                    </button>
+                                  </td>
+                                </tr>
+                              )
+                            )
+                          ) : (
+                            <tr>
+                              <td colSpan="5">No categories found.</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
 
-                  {/* Pagination */}
-                  <div className="d-flex justify-content-between mt-3">
-                    <button
-                      className="btn btn-secondary"
-                      disabled={currentPage === 1}
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                    >
-                      Previous
-                    </button>
-                    <span>
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                      className="btn btn-secondary"
-                      disabled={currentPage === totalPages}
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                    >
-                      Next
-                    </button>
-                  </div>
+                    {/* Pagination */}
+                    <div className="d-flex justify-content-between mt-3">
+                      <button
+                        className="btn btn-secondary"
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                      >
+                        Previous
+                      </button>
+                      <span>
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      <button
+                        className="btn btn-secondary"
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                      >
+                        Next
+                      </button>
+                    </div>
 
-                  {/* Rows per page */}
-                  <div className="mt-3">
-                    <label className="form-label">Rows per page:</label>
-                    <select
-                      className="form-select w-auto"
-                      value={rowsPerPage}
-                      onChange={(e) => {
-                        setRowsPerPage(Number(e.target.value));
-                        setCurrentPage(1);
-                      }}
-                    >
-                      {[5, 10, 20, 40].map((size) => (
-                        <option key={size} value={size}>
-                          {size}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <ToastContainer position="top-right" autoClose={3000} />
+                    {/* Rows per page */}
+                    <div className="mt-3">
+                      <label className="form-label">Rows per page:</label>
+                      <select
+                        className="form-select w-auto"
+                        value={rowsPerPage}
+                        onChange={(e) => {
+                          setRowsPerPage(Number(e.target.value));
+                          setCurrentPage(1);
+                        }}
+                      >
+                        {[5, 10, 20, 40].map((size) => (
+                          <option key={size} value={size}>
+                            {size}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <ToastContainer position="top-right" autoClose={3000} />
+                  </Card>
                 </Col>
               </Row>
             </Container>

@@ -23,8 +23,8 @@ const BaseTable = ({
 
   return (
     <div className="table-responsive ">
-      <table className="table align-middle table-nowrap table-striped-columns ">
-        <thead className="table-light">
+      <table className="table align-middle table-nowrap table-striped">
+        <thead>
           <tr>
             {safeColumns.map((column) => (
               <th key={column} scope="col">

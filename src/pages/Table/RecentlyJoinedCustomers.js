@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardBody, CardHeader, Col, Container, Row } from "reactstrap";
+import { Card, CardBody, Col, Container, Row, Table } from "reactstrap";
 import API from "../../services/api";
 import BaseTable from "./BaseTable";
+import PreviewCardHeader from "../../Components/Common/PreviewCardHeader";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Table.css";
 
@@ -72,24 +73,25 @@ const RecentlyJoinedCustomers = () => {
     <React.Fragment>
       <div className="page-content Table" style={{ paddingBottom: "0" }}>
         <Container fluid className="px-4">
-          <Row>
+          <Row className="justify-content-center">
             <Col xl={12} md={12}>
               {tableData.map((table, index) => (
-                <Card key={index} className="shadow-lg bg-white rounded">
-                  <CardHeader className="align-items-center d-flex">
-                    <h5 className="card-title mb-0 fw-bold fs-4 flex-grow-1">
-                      Recently Joined Customers
-                    </h5>
-                  </CardHeader>
+                <Card key={index}>
+                  <PreviewCardHeader title="Recently Joined Customers" />
                   <CardBody>
-                    <BaseTable
-                      columns={table.columns}
-                      data={table.data}
-                      selectedCustomers={table.selectedCustomers}
-                      handleSelectAll={table.handleSelectAll}
-                      handleSelectCustomer={table.handleSelectCustomer}
-                      error={table.error}
-                    />
+                    <Table
+                      className="table-nowrap align-middle mb-0"
+                      responsive
+                    >
+                      <BaseTable
+                        columns={table.columns}
+                        data={table.data}
+                        selectedCustomers={table.selectedCustomers}
+                        handleSelectAll={table.handleSelectAll}
+                        handleSelectCustomer={table.handleSelectCustomer}
+                        error={table.error}
+                      />
+                    </Table>
                   </CardBody>
                 </Card>
               ))}
