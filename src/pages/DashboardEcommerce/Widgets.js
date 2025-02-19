@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import API from "../../services/api";
 import BaseCard from "./BaseCard";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 import LocalPharmacyIcon from "@mui/icons-material/LocalPharmacy";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
@@ -21,22 +23,21 @@ const Widgets = () => {
 
   const apiEndpoint = "/api/admin/dashBoard/countOfData";
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (retryCount = 3) => {
       try {
         const response = await API.get(apiEndpoint);
         console.log("API response: ", response.data.data);
         setCardData(response.data.data);
-      } catch (err) {
-        console.error(
-          "Error fetching data:",
-          err.response?.data || err.message
-        );
-        setError(
-          err.response?.data?.message ||
-            "Failed to load data. Please try again later."
-        );
-      } finally {
         setLoading(false);
+      } catch (err) {
+        if (retryCount > 0) {
+          console.warn("Retrying API fetch...", retryCount);
+          setTimeout(() => fetchData(retryCount - 1), 2000); 
+        } else {
+          console.error("Error fetching data:", err.message);
+          setError("Failed to load data. Please try again later.");
+          setLoading(false);
+        }
       }
     };
     fetchData();
@@ -126,20 +127,22 @@ const Widgets = () => {
   ];
   return (
     <div>
-      {loading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p style={{ color: "red" }}>{error}</p>
+      {error ? (
+        <p className="text-danger text-center">{error}</p>
       ) : (
         <Row>
           {cardsInfo.map((card) => (
             <Col xl={3} lg={3} md={4} sm={6} xs={12} key={card.id}>
-              <BaseCard
-                label={card.label}
-                value={card.value}
-                icon={card.icon}
-                bgcolor={card.bgcolor}
-              />
+              {loading ? (
+                <Skeleton height={120} />
+              ) : (
+                <BaseCard
+                  label={card.label}
+                  value={card.value}
+                  icon={card.icon}
+                  bgcolor={card.bgcolor}
+                />
+              )}
             </Col>
           ))}
         </Row>

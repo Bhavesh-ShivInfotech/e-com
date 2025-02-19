@@ -6,6 +6,7 @@ import Revenue from "./DashboardEcommerce/Revenue";
 import RecentlyJoinedCustomers from "./Table/RecentlyJoinedCustomers";
 import ListOfOrder from "./Table/ListOfOrder";
 import "../../src/index.css";
+
 const Spinner = () => {
   return (
     <div className="spinner-container">
@@ -14,16 +15,19 @@ const Spinner = () => {
   );
 };
 
+const fetchData = () => {
+  return new Promise((resolve) => setTimeout(resolve, 5000));
+};
+
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 10000);
-
-    return () => clearTimeout(timer);
+    Promise.all([fetchData(), fetchData()])
+      .then(() => setLoading(false))
+      .catch((error) => console.error("Error loading data:", error));
   }, []);
+
   return (
     <Layout>
       {loading ? (
