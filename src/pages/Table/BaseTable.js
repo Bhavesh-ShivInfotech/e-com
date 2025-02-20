@@ -27,7 +27,7 @@ const BaseTable = ({
     <div className="table-responsive ">
       <Table
         responsive
-        className="align-middle table-nowrap table-striped table-striped-columns"
+        className="align-middle table-nowrap  table-striped-columns"
       >
         <thead className="table-light">
           <tr>
@@ -53,7 +53,9 @@ const BaseTable = ({
               <tr key={row?.id}>
                 {safeColumns.map((col) => (
                   <td key={col.key || col}>
-                    {col.key === "status" ? (
+                    {col.render ? (
+                      col.render(row[col.key], row)
+                    ) : col.key === "status" ? (
                       <span
                         className={
                           getStatusClass ? getStatusClass(row[col.key]) : ""
