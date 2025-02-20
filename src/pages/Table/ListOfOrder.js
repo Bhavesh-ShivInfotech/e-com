@@ -1,45 +1,18 @@
 import React, { useEffect, useState } from "react";
-import API from "../../services/api";
 import { Card, CardBody, CardHeader, Col, Container, Row } from "reactstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import BaseTable from "./BaseTable2";
 import Pagination from "../../Components/Common/Pagination";
 import PreviewCardHeader from "../../Components/Common/PreviewCardHeader";
 import "./Table.css";
-const ListOfOrder = () => {
-  const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const ListOfOrder = ({ data }) => {
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const apiEndpoint4 = "/api/admin/dashBoard/listOfOrder";
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await API.get(apiEndpoint4);
-        setCustomers(response.data.data);
-      } catch (err) {
-        console.error(
-          "Error fetching data:",
-          err.response?.data || err.message
-        );
-        setError(
-          err.response?.data?.message ||
-            "Failed to load data. Please try again later."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedOrders(customers.map((order) => order.order_id));
+      setSelectedOrders(data.map((order) => order.order_id));
     } else {
       setSelectedOrders([]);
     }
@@ -64,7 +37,7 @@ const ListOfOrder = () => {
     }
   };
 
-  const filteredCustomers = customers.filter((customer) => customer.userName);
+  const filteredCustomers = data.filter((customer) => customer.userName);
   const totalPages = Math.ceil(filteredCustomers.length / rowsPerPage);
 
   const currentRows = filteredCustomers.slice(
@@ -114,8 +87,6 @@ const ListOfOrder = () => {
                     onSelectRow={handleSelectOrder}
                     onSelectAll={handleSelectAll}
                     getStatusClass={getStatusClass}
-                    isLoading={loading}
-                    error={error}
                   />
                   <Pagination
                     totalPages={totalPages}

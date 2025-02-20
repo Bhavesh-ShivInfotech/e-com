@@ -1,4 +1,3 @@
-//setup Axios
 import axios from "axios";
 
 const API = axios.create({
@@ -12,7 +11,6 @@ API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("adminToken");
     if (token) {
-      // console.log("token", token);
       config.headers.Authorization = token;
     }
     return config;
@@ -21,4 +19,18 @@ API.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+//dashboard get data
+export const getData = async (endpoint) => {
+  try {
+    const response = await API.get(endpoint);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching data:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
 export default API;

@@ -44,7 +44,6 @@ const Pagination = ({
           <ul className="pagination pagination-separated mb-0">
             <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
               <Link
-                to="#!"
                 className="page-link"
                 onClick={() => handleClick(currentPage - 1)}
               >
@@ -62,7 +61,6 @@ const Pagination = ({
               }`}
             >
               <Link
-                to="#!"
                 className="page-link"
                 onClick={() => handleClick(currentPage + 1)}
               >

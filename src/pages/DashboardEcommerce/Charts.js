@@ -1,31 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardBody, CardHeader, Col, Row, Container } from "reactstrap";
 import Chart from "react-apexcharts";
-import API from "../../services/api";
-import "./Revenue1.css";
+import "./Charts1.css";
 
-const Revenue = () => {
-  const [graphData, setGraphData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchGraphData = async () => {
-      try {
-        const response = await API.get("/api/admin/dashBoard/graphOfCustomer");
-        const graphDataMapped = new Array(12).fill(0);
-        response.data.data.forEach((dataPoint) => {
-          graphDataMapped[dataPoint.month - 1] = dataPoint.count;
-        });
-        setGraphData(graphDataMapped);
-      } catch (err) {
-        setError("Failed to load graph data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchGraphData();
-  }, []);
+const Charts = ({ data }) => {
+  const graphDataMapped = new Array(12).fill(0);
+  data?.forEach((dataPoint) => {
+    graphDataMapped[dataPoint.month - 1] = dataPoint.count;
+  });
 
   const chartOptions = {
     chart: {
@@ -61,11 +43,11 @@ const Revenue = () => {
   };
 
   const chartSeries = [
-    { name: "Active Customers", type: "line", data: graphData },
+    { name: "Active Customers", type: "line", data: graphDataMapped },
     {
       name: "Active Customers",
       type: "bar",
-      data: graphData,
+      data: graphDataMapped,
     },
   ];
 
@@ -101,4 +83,4 @@ const Revenue = () => {
   );
 };
 
-export default Revenue;
+export default Charts;

@@ -1,39 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardBody, Col, Container, Row, Table } from "reactstrap";
-import API from "../../services/api";
 import BaseTable from "./BaseTable";
 import PreviewCardHeader from "../../Components/Common/PreviewCardHeader";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Table.css";
 
-const RecentlyJoinedCustomers = () => {
-  const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const RecentlyJoinedCustomers = ({ data }) => {
   const [selectedCustomers, setSelectedCustomers] = useState([]);
-
-  const apiEndpoint = "/api/admin/dashBoard/recentlyRegistration";
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await API.get(apiEndpoint);
-        setCustomers(response.data.data);
-      } catch (err) {
-        setError(
-          err.response?.data?.message ||
-            "Failed to load data. Please try again later."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedCustomers(customers.map((customer) => customer.id));
+      setSelectedCustomers(data.map((customer) => customer.id));
     } else {
       setSelectedCustomers([]);
     }
@@ -60,12 +37,11 @@ const RecentlyJoinedCustomers = () => {
 
   const tableData = [
     {
-      data: customers,
+      data: data,
       columns: columns,
       selectedCustomers: selectedCustomers,
       handleSelectAll: handleSelectAll,
       handleSelectCustomer: handleSelectCustomer,
-      error: error,
     },
   ];
 
