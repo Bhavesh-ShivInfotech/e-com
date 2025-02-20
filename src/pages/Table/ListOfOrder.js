@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardBody, CardHeader, Col, Container, Row } from "reactstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import BaseTable from "./BaseTable2";
+import BaseTable from "./BaseTable";
 import Pagination from "../../Components/Common/Pagination";
 import PreviewCardHeader from "../../Components/Common/PreviewCardHeader";
 import "./Table.css";

@@ -1,21 +1,23 @@
 import React from "react";
-
+import PropTypes from "prop-types";
+import moment from "moment";
+import { Table } from "reactstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
 const BaseTable = ({
   columns,
   data,
   selectedCustomers,
   handleSelectAll,
   handleSelectCustomer,
+  onSelectRow,
+  onSelectAll,
+  getStatusClass,
+  isLoading,
   error,
 }) => {
   const formatDate = (date) => {
     if (!date) return "N/A";
-    const formattedDate = new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-    return formattedDate;
+    return moment(date).format("MMMM D, YYYY");
   };
 
   const safeColumns = columns || [];
@@ -23,12 +25,15 @@ const BaseTable = ({
 
   return (
     <div className="table-responsive ">
-      <table className="table align-middle table-nowrap table-striped">
-        <thead>
+      <Table
+        responsive
+        className="align-middle table-nowrap table-striped table-striped-columns"
+      >
+        <thead className="table-light">
           <tr>
-            {safeColumns.map((column) => (
-              <th key={column} scope="col">
-                {column}
+            {safeColumns.map((col) => (
+              <th key={col.key || col} scope="col">
+                {col.title || col}
               </th>
             ))}
           </tr>
@@ -45,14 +50,25 @@ const BaseTable = ({
             </tr>
           ) : safeData.length > 0 ? (
             safeData.map((row) => (
-              <tr key={row.id}>
-                {safeColumns.map((column) => (
-                  <td key={column}>
-                    {column === "Date of Birth"
-                      ? formatDate(row.dob)
-                      : column === "Created At"
-                      ? formatDate(row.created_at)
-                      : row[column.toLowerCase().replace(/\s/g, "_")] || "N/A"}
+              <tr key={row?.id}>
+                {safeColumns.map((col) => (
+                  <td key={col.key || col}>
+                    {col.key === "status" ? (
+                      <span
+                        className={
+                          getStatusClass ? getStatusClass(row[col.key]) : ""
+                        }
+                      >
+                        {row[col.key]}
+                      </span>
+                    ) : col === "Date of Birth" ? (
+                      formatDate(row.dob)
+                    ) : col === "Created At" ? (
+                      formatDate(row.created_at)
+                    ) : (
+                      row[col.key || col.toLowerCase().replace(/\s/g, "_")] ||
+                      "N/A"
+                    )}
                   </td>
                 ))}
               </tr>
@@ -68,9 +84,30 @@ const BaseTable = ({
             </tr>
           )}
         </tbody>
-      </table>
+      </Table>
     </div>
   );
+};
+
+BaseTable.propTypes = {
+  columns: PropTypes.array.isRequired,
+  data: PropTypes.array.isRequired,
+  selectedCustomers: PropTypes.array,
+  selectedRows: PropTypes.array,
+  handleSelectAll: PropTypes.func,
+  handleSelectCustomer: PropTypes.func,
+  onSelectRow: PropTypes.func,
+  onSelectAll: PropTypes.func,
+  getStatusClass: PropTypes.func,
+  isLoading: PropTypes.bool,
+  error: PropTypes.string,
+};
+
+BaseTable.defaultProps = {
+  isLoading: false,
+  error: null,
+  selectedCustomers: [],
+  selectedRows: [],
 };
 
 export default BaseTable;
