@@ -19,7 +19,7 @@ import {
 } from "reactstrap";
 import { ClipLoader } from "react-spinners";
 import Layout from "../../Layouts/index";
-import API from "../../services/api";
+import API, { deleteCategory } from "../../services/api";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -28,6 +28,9 @@ import "./Category.css";
 import "../../index.css";
 import SimpleReactValidator from "simple-react-validator";
 import BaseTable from "../Table/BaseTable";
+import { fetchCategories } from "../../services/api";
+import { ADD_CATEGORY, EDIT_CATEGORY } from "../../services/apiendpoints";
+import CategoryModal from "./CategoryModal";
 const Spinner = () => {
   return (
     <div className="spinner-container ">
@@ -70,24 +73,33 @@ const Category = () => {
     }
   };
 
-  const tog_delete = () => setmodal_delete(!modal_delete);
+  // const tog_delete = () => {
+  //   console.log("Before toggle: model_delete =", modal_delete);
+  //   setmodal_delete(!modal_delete);
+  //   console.log("After toggle: model_delete =", !modal_delete);
+  // };
+
+  const tog_delete = () => {
+    setmodal_delete((prev) => {
+      console.log("Before toggle: model_delete =", prev);
+      const newState = !prev;
+      console.log("After toggle: modal_delete =", newState);
+      return newState;
+    });
+  };
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const loadCategories = async () => {
       try {
-        const response = await API.post("/api/category/listOfCategory", {
-          model: "Category",
-          limit: 500,
-          condition: { is_archived: false },
-        });
-        setCategories(response.data?.data || []);
+        const response = await fetchCategories();
+        setCategories(response.data || []);
       } catch (err) {
         console.error("Error fetching categories:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchCategories();
+    loadCategories();
   }, []);
 
   const handleRowsPerPageChange = (e) => {
@@ -126,8 +138,8 @@ const Category = () => {
 
     try {
       const endpoint = isEditMode
-        ? `/api/category/editCategory/${category.id}`
-        : "/api/category/addCategory";
+        ? `${EDIT_CATEGORY}/${category.id}`
+        : ADD_CATEGORY;
       const method = isEditMode ? "put" : "post";
 
       const response = await API[method](endpoint, formData, {
@@ -195,25 +207,20 @@ const Category = () => {
     if (!categoryToDelete) return;
 
     try {
-      const response = await API.put(
-        `/api/category/deleteCategory/${categoryToDelete.id}`,
-        {
-          is_archived: true,
-        }
-      );
-      if (response?.data?.status === "success") {
-        toast.success(
-          response?.data?.message || "Category deleted successfully!",
-          {
-            position: "top-right",
-            autoClose: 3000,
-          }
-        );
-        setCategories(
-          categories.filter(({ id }) => id !== categoryToDelete.id)
+      const response = await deleteCategory(categoryToDelete.id);
+      if (response?.status === "success") {
+        toast.success(response?.message || "Category deleted successfully!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        // setCategories(
+        //   categories.filter(({ id }) => id !== categoryToDelete.id)
+        // );
+        setCategories((prevCategories) =>
+          prevCategories.filter(({ id }) => id !== categoryToDelete.id)
         );
       } else {
-        toast.error(response?.data?.message || "Failed to delete category.");
+        toast.error(response?.message || "Failed to delete category.");
       }
     } catch (error) {
       toast.error(error.response?.data || error.message);
@@ -320,85 +327,6 @@ const Category = () => {
                             </div>
                           </Col>
                         </Row>
-                        {/* 
-                        <div className="table-responsive table-card mt-3 mb-1">
-                          <table
-                            className="table align-middle table-nowrap"
-                            id="customerTable"
-                          >
-                            <thead className="table-light">
-                              <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Image</th>
-                                <th>Action</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {currentRows.length > 0 ? (
-                                currentRows.map(
-                                  ({ id, name, description, image }) => (
-                                    <tr key={id}>
-                                      <td>{id}</td>
-                                      <td>{name}</td>
-                                      <td>{description}</td>
-                                      <td>
-                                        <img
-                                          src={image}
-                                          alt={name}
-                                          className="img-thumbnail"
-                                          style={{
-                                            width: "80px",
-                                            height: "80px",
-                                          }}
-                                        />
-                                      </td>
-                                      <td>
-                                        <div className="d-flex gap-2">
-                                          <div className="edit">
-                                            <button
-                                              className="btn btn-sm btn-success edit-item-btn"
-                                              onClick={() =>
-                                                handleEditClick({
-                                                  id,
-                                                  name,
-                                                  description,
-                                                  image,
-                                                })
-                                              }
-                                            >
-                                              Edit
-                                            </button>
-                                          </div>
-                                          <div className="remove">
-                                            <button
-                                              className="btn btn-sm btn-danger remove-item-btn"
-                                              onClick={() =>
-                                                handleDeleteClick({
-                                                  id,
-                                                  name,
-                                                  description,
-                                                  image,
-                                                })
-                                              }
-                                            >
-                                              Remove
-                                            </button>
-                                          </div>
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  )
-                                )
-                              ) : (
-                                <tr>
-                                  <td colSpan="5">No categories found.</td>
-                                </tr>
-                              )}
-                            </tbody>
-                          </table>
-                        </div> */}
 
                         <BaseTable
                           columns={columns}
@@ -423,116 +351,23 @@ const Category = () => {
           </div>
         )}
 
-        <Modal
+        <CategoryModal
           isOpen={modal_list}
           toggle={tog_list}
-          centered
-          contentClassName="border-0"
-          style={{ maxWidth: "500px" }}
-        >
-          <ModalHeader
-            className="bg-light p-3 border-0"
-            style={{ paddingBottom: "0.5rem" }}
-            toggle={tog_list}
-          >
-            <h5 className="modal-title m-0">
-              {isEditMode ? "Edit Category" : "Add Category"}
-            </h5>
-          </ModalHeader>
-          <ModalBody
-            className="p-3"
-            style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
-          >
-            <Form className="tablelist-form" onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <Label
-                  htmlFor="categoryName"
-                  className="form-label text-start w-100"
-                >
-                  Category Name
-                </Label>
-                <Input
-                  type="text"
-                  id="categoryName"
-                  className="form-control"
-                  placeholder="Enter Category Name"
-                  name="name"
-                  value={category.name}
-                  onChange={handleChange}
-                />
-                {validator.message("name", category.name, "required")}
-              </div>
+          isEditMode={isEditMode}
+          category={category}
+          setCategory={setCategory}
+          preview={preview}
+          setPreview={setPreview}
+          validator={validator}
+          handleSubmit={handleSubmit}
+          handleChange={handleChange}
+          handleImageChange={handleImageChange}
+        />
 
-              <div className="mb-3">
-                <Label
-                  htmlFor="categoryDescription"
-                  className="form-label text-start w-100"
-                >
-                  Description
-                </Label>
-                <Input
-                  type="textarea"
-                  id="categoryDescription"
-                  className="form-control"
-                  placeholder="Enter Description"
-                  name="description"
-                  value={category.description}
-                  onChange={handleChange}
-                />
-                {validator.message(
-                  "description",
-                  category.description,
-                  "required"
-                )}
-              </div>
-
-              <div className="mb-3">
-                <Label
-                  htmlFor="categoryImage"
-                  className="form-label text-start w-100"
-                >
-                  Category Image
-                </Label>
-                <Input
-                  type="file"
-                  id="categoryImage"
-                  className="mb-2"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
-                {validator.message("image", category.image, "required")}
-                {preview && (
-                  <div className="img-preview">
-                    <img src={preview} alt="Preview" className="preview-img" />
-                  </div>
-                )}
-              </div>
-            </Form>
-          </ModalBody>
-          <ModalFooter
-            className="border-0 p-3"
-            style={{ paddingTop: "0.5rem" }}
-          >
-            <div className="hstack gap-2 justify-content-end">
-              <button
-                type="button"
-                className="btn btn-light"
-                onClick={tog_list}
-              >
-                Close
-              </button>
-              <button
-                type="submit"
-                className="btn btn-success"
-                onClick={handleSubmit}
-              >
-                {isEditMode ? "Update Category" : "Add Category"}
-              </button>
-            </div>
-          </ModalFooter>
-        </Modal>
-
+        {/* Delete Model */}
         <Modal
+          fade={true}
           isOpen={modal_delete}
           toggle={tog_delete}
           className="modal fade zoomIn"
