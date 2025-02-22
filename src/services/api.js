@@ -8,6 +8,7 @@ import {
   EDIT_CATEGORY,
 } from "./apiendpoints";
 import { CallSharp, Category } from "@mui/icons-material";
+// import { config } from "webpack";
 const API = axios.create({
   baseURL: "https://e-com-pharmacy-final.onrender.com",
   headers: {
@@ -28,6 +29,28 @@ API.interceptors.request.use(
   }
 );
 
+// const createMultipartInstance = () => {
+//   const instance = axios.create({
+//     baseURL: API.defaults.baseURL,
+//   });
+
+//   instance.interceptors.request.use(
+//     (config) => {
+//       const token = localStorage.getItem("adminToken");
+//       if (token) {
+//         config.headers["Authorization"] = token;
+//       }
+//       config.headers["Content-Type"] = "multipart/form-data";
+//       return config;
+//     },
+//     (error) => {
+//       return Promise.reject(error);
+//     }
+//   );
+//   return instance;
+// };
+
+// const multipartAPI = createMultipartInstance();
 export const getData = async (endpoint) => {
   try {
     const response = await API.get(endpoint);
@@ -59,10 +82,10 @@ export const putData = async (endpoint, data) => {
 };
 export const deleteData = async (endpoint, data) => {
   try {
-    const response = await API.put(endpoint, { data });
+    const response = await API.put(endpoint, data);
     return response.data;
   } catch (error) {
-    toast.error(error.response?.data || "Error deleting data");
+    toast.error(error.response?.data);
     throw error;
   }
 };

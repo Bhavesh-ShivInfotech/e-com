@@ -29,8 +29,10 @@ import Pagination from "../../Components/Common/Pagination";
 import SimpleReactValidator from "simple-react-validator";
 import BaseTable from "../Table/BaseTable";
 import { fetchCategories } from "../../services/api";
-import CategoryModal from "../../Components/Common/CommonModal";
+import CommonModal from "../../Components/Common/CommonModal";
+import CommonDeleteModal from "../../Components/Common/CommonDeleteModal";
 import Spinner from "../../Components/Common/Spinner";
+import { HTTP_STATUS_CODES } from "../../Components/constants/httpStatusCodes";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Category.css";
@@ -131,26 +133,20 @@ const Category = () => {
         ? await editCategory(category.id, formData)
         : await addCategory(formData);
 
-      if (response?.status === "success") {
-        toast.success(response.message, {
-          position: "top-right",
-          autoClose: 3000,
-        });
+      if (
+        response?.statusCode &&
+        HTTP_STATUS_CODES.SUCCESS.includes(response?.statusCode)
+      ) {
+        toast.success(response.message);
         setCategory({ id: "", name: "", description: "", image: null });
         setPreview(null);
         tog_list();
         navigate("/category");
       } else {
-        toast.error(response.message, {
-          position: "top-right",
-          autoClose: 3000,
-        });
+        toast.error(response.message);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message, {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error(err.response?.data?.message);
     } finally {
       setLoading(false);
     }
@@ -178,25 +174,19 @@ const Category = () => {
 
     try {
       const response = await deleteCategory(categoryToDelete.id);
-      if (response?.status === "success") {
-        toast.success(response.message, {
-          position: "top-right",
-          autoClose: 3000,
-        });
+      if (
+        response?.statusCode &&
+        HTTP_STATUS_CODES.SUCCESS.includes(response?.statusCode)
+      ) {
+        toast.success(response.message);
         setCategories((prevCategories) =>
           prevCategories.filter(({ id }) => id !== categoryToDelete.id)
         );
       } else {
-        toast.error(response.message, {
-          position: "top-right",
-          autoClose: 3000,
-        });
+        toast.error(response.message);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message, {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error(error.response?.data?.message || error.message);
     } finally {
       setmodal_delete(false);
       setCategoryToDelete(null);
@@ -318,24 +308,101 @@ const Category = () => {
           </div>
         )}
 
-        <CategoryModal
+        <CommonModal
+          fade={true}
           isOpen={modal_list}
           toggle={tog_list}
-          isEditMode={isEditMode}
-          category={category}
-          setCategory={setCategory}
-          preview={preview}
-          setPreview={setPreview}
-          validator={validator}
-          handleSubmit={handleSubmit}
-          handleChange={handleChange}
-          handleImageChange={handleImageChange}
-        />
+          title={isEditMode ? "Edit Category" : "Add Category"}
+          footerButtons={
+            <>
+              <button
+                type="button"
+                className="btn btn-light"
+                onClick={tog_list}
+              >
+                Close
+              </button>
+              <button
+                type="submit"
+                className="btn btn-success"
+                onClick={handleSubmit}
+              >
+                {isEditMode ? "Update Category" : "Add Category"}
+              </button>
+            </>
+          }
+        >
+          <Form className="tablelist-form" onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <Label
+                htmlFor="categoryName"
+                className="form-label text-start w-100"
+              >
+                Category Name
+              </Label>
+              <Input
+                type="text"
+                id="categoryName"
+                className="form-control"
+                placeholder="Enter Category Name"
+                name="name"
+                value={category.name}
+                onChange={handleChange}
+              />
+              {validator.message("name", category.name, "required")}
+            </div>
 
-        <CategoryModal
+            <div className="mb-3">
+              <Label
+                htmlFor="categoryDescription"
+                className="form-label text-start w-100"
+              >
+                Description
+              </Label>
+              <Input
+                type="textarea"
+                id="categoryDescription"
+                className="form-control"
+                placeholder="Enter Description"
+                name="description"
+                value={category.description}
+                onChange={handleChange}
+              />
+              {validator.message(
+                "description",
+                category.description,
+                "required"
+              )}
+            </div>
+
+            <div className="mb-3">
+              <Label
+                htmlFor="categoryImage"
+                className="form-label text-start w-100"
+              >
+                Category Image
+              </Label>
+              <Input
+                type="file"
+                id="categoryImage"
+                className="mb-2"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+              {validator.message("image", category.image, "required")}
+              {preview && (
+                <div className="img-preview">
+                  <img src={preview} alt="Preview" className="preview-img" />
+                </div>
+              )}
+            </div>
+          </Form>
+        </CommonModal>
+
+        <CommonDeleteModal
           isOpen={modal_delete}
           toggle={tog_delete}
-          isDeleteModal={true}
+          message="Are you Sure You want to Remove this Record?"
           confirmDelete={confirmDelete}
         />
       </Layout>
