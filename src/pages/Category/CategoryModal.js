@@ -101,7 +101,7 @@ const CategoryModal = ({
           </div>
         </Form>
       </ModalBody>
-      <ModalFooter className="border-0 p-3" style={{ paddingTop: "0.5rem" }}>
+      <ModalFooter className="border-0 p-3 model-footer">
         <div className="hstack gap-2 justify-content-end">
           <button type="button" className="btn btn-light" onClick={toggle}>
             Close
