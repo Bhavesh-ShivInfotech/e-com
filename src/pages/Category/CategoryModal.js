@@ -8,7 +8,7 @@ import {
   Input,
   Button,
 } from "reactstrap";
-
+import "./Category.css";
 const CategoryModal = ({
   isOpen,
   toggle,
@@ -28,21 +28,17 @@ const CategoryModal = ({
       toggle={toggle}
       centered
       contentClassName="border-0"
-      style={{ maxWidth: "500px" }}
+      className="edit-model"
     >
       <ModalHeader
-        className="bg-light p-3 border-0"
-        style={{ paddingBottom: "0.5rem" }}
+        className="bg-light p-3 border-0 model-header"
         toggle={toggle}
       >
         <h5 className="modal-title m-0">
           {isEditMode ? "Edit Category" : "Add Category"}
         </h5>
       </ModalHeader>
-      <ModalBody
-        className="p-3"
-        style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
-      >
+      <ModalBody className="p-3 model-body">
         <Form className="tablelist-form" onSubmit={handleSubmit}>
           <div className="mb-3">
             <Label

@@ -21,16 +21,16 @@ import { ClipLoader } from "react-spinners";
 import Layout from "../../Layouts/index";
 import API, { deleteCategory } from "../../services/api";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "bootstrap/dist/css/bootstrap.min.css";
 import Pagination from "../../Components/Common/Pagination";
-import "./Category.css";
-import "../../index.css";
 import SimpleReactValidator from "simple-react-validator";
 import BaseTable from "../Table/BaseTable";
 import { fetchCategories } from "../../services/api";
 import { ADD_CATEGORY, EDIT_CATEGORY } from "../../services/apiendpoints";
 import CategoryModal from "./CategoryModal";
+import "react-toastify/dist/ReactToastify.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./Category.css";
+import "../../index.css";
 const Spinner = () => {
   return (
     <div className="spinner-container ">
@@ -72,12 +72,6 @@ const Category = () => {
       setPreview(null);
     }
   };
-
-  // const tog_delete = () => {
-  //   console.log("Before toggle: model_delete =", modal_delete);
-  //   setmodal_delete(!modal_delete);
-  //   console.log("After toggle: model_delete =", !modal_delete);
-  // };
 
   const tog_delete = () => {
     setmodal_delete((prev) => {
@@ -157,7 +151,6 @@ const Category = () => {
             autoClose: 3000,
           }
         );
-
         setCategory({ id: "", name: "", description: "", image: null });
         setPreview(null);
         tog_list();
@@ -213,9 +206,6 @@ const Category = () => {
           position: "top-right",
           autoClose: 3000,
         });
-        // setCategories(
-        //   categories.filter(({ id }) => id !== categoryToDelete.id)
-        // );
         setCategories((prevCategories) =>
           prevCategories.filter(({ id }) => id !== categoryToDelete.id)
         );
@@ -250,12 +240,7 @@ const Category = () => {
       key: "image",
       title: "Image",
       render: (image) => (
-        <img
-          src={image}
-          alt="Category"
-          className="img-thumbnail"
-          style={{ width: "80px", height: "80px" }}
-        />
+        <img src={image} alt="Category" className="img-thumbnail w-75 h-75" />
       ),
     },
     {
@@ -365,7 +350,6 @@ const Category = () => {
           handleImageChange={handleImageChange}
         />
 
-        {/* Delete Model */}
         <Modal
           fade={true}
           isOpen={modal_delete}
@@ -390,7 +374,7 @@ const Category = () => {
                 src="https://cdn.lordicon.com/gsqxdxog.json"
                 trigger="loop"
                 colors="primary:#f7b84b,secondary:#f06548"
-                style={{ width: "100px", height: "100px" }}
+                className="w-100 h-100"
               ></lord-icon>
               <div className="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
                 <h4>Are you Sure ?</h4>

@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Input } from "reactstrap";
-
-//SimpleBar
 import SimpleBar from "simplebar-react";
 
 const SearchOption = () => {

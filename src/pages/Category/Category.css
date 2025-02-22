@@ -27,3 +27,15 @@
   text-align: left;
   display: block;
 }
+
+.edit-model {
+  max-width: 500px;
+}
+
+.model-header {
+  padding-bottom: 0.5rem;
+}
+.model-body {
+  padding-bottom: 0.5rem;
+  padding-top: 0.5rem;
+}
