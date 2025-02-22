@@ -1,4 +1,6 @@
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { LIST_OF_CATEGORY, DELETE_CATEGORY } from "./apiendpoints";
 import { CallSharp, Category } from "@mui/icons-material";
 const API = axios.create({
@@ -21,28 +23,22 @@ API.interceptors.request.use(
   }
 );
 
-//dashboard get data
 export const getData = async (endpoint) => {
   try {
     const response = await API.get(endpoint);
     return response.data;
   } catch (error) {
-    console.error(
-      "Error fetching data:",
-      error.response?.data || error.message
-    );
+    toast.error(error.response?.data || "Error fetching data");
     throw error;
   }
 };
-
-//Generic POST request
 
 export const postData = async (endpoint, data) => {
   try {
     const response = await API.post(endpoint, data);
     return response.data;
   } catch (error) {
-    console.error("Error posting data:", error.response?.data || error.message);
+    toast.error(error.response?.data || "Error posting data");
     throw error;
   }
 };
@@ -52,12 +48,10 @@ export const deleteData = async (endpoint, data) => {
     const response = await API.put(endpoint, { data });
     return response.data;
   } catch (error) {
-    console.log("Error deleting data: ", error.response?.data || error.message);
+    toast.error(error.response?.data || "Error deleting data");
     throw error;
   }
 };
-
-// Category-specific API Calls
 
 export const fetchCategories = async () => {
   return postData(LIST_OF_CATEGORY, {
