@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
@@ -19,25 +19,22 @@ import {
 } from "reactstrap";
 import { ClipLoader } from "react-spinners";
 import Layout from "../../Layouts/index";
-import API, { deleteCategory } from "../../services/api";
+import API, {
+  deleteCategory,
+  addCategory,
+  editCategory,
+} from "../../services/api";
 import { toast, ToastContainer } from "react-toastify";
 import Pagination from "../../Components/Common/Pagination";
 import SimpleReactValidator from "simple-react-validator";
 import BaseTable from "../Table/BaseTable";
 import { fetchCategories } from "../../services/api";
-import { ADD_CATEGORY, EDIT_CATEGORY } from "../../services/apiendpoints";
-import CategoryModal from "./CategoryModal";
+import CategoryModal from "../../Components/Common/CommonModal";
+import Spinner from "../../Components/Common/Spinner";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Category.css";
 import "../../index.css";
-const Spinner = () => {
-  return (
-    <div className="spinner-container ">
-      <ClipLoader color="#007bff" size={50} />
-    </div>
-  );
-};
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
@@ -75,26 +72,25 @@ const Category = () => {
 
   const tog_delete = () => {
     setmodal_delete((prev) => {
-      console.log("Before toggle: model_delete =", prev);
       const newState = !prev;
-      console.log("After toggle: modal_delete =", newState);
       return newState;
     });
   };
 
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const response = await fetchCategories();
-        setCategories(response.data || []);
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadCategories();
+  const loadCategories = useCallback(async () => {
+    try {
+      const response = await fetchCategories();
+      setCategories(response.data || []);
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
 
   const handleRowsPerPageChange = (e) => {
     setRowsPerPage(Number(e.target.value));
@@ -131,49 +127,30 @@ const Category = () => {
     formData.append("image", category.image);
 
     try {
-      const endpoint = isEditMode
-        ? `${EDIT_CATEGORY}/${category.id}`
-        : ADD_CATEGORY;
-      const method = isEditMode ? "put" : "post";
+      const response = isEditMode
+        ? await editCategory(category.id, formData)
+        : await addCategory(formData);
 
-      const response = await API[method](endpoint, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (response?.data?.status === "success") {
-        toast.success(
-          response.data.message ||
-            `Category ${isEditMode ? "updated" : "added"} successfully!`,
-          {
-            position: "top-right",
-            autoClose: 3000,
-          }
-        );
+      if (response?.status === "success") {
+        toast.success(response.message, {
+          position: "top-right",
+          autoClose: 3000,
+        });
         setCategory({ id: "", name: "", description: "", image: null });
         setPreview(null);
         tog_list();
         navigate("/category");
       } else {
-        toast.error(
-          response.data.message ||
-            `Failed to ${isEditMode ? "update" : "add"} category.`,
-          {
-            position: "top-right",
-            autoClose: 3000,
-          }
-        );
-      }
-    } catch (err) {
-      toast.error(
-        err.response?.data?.message ||
-          `Failed to ${isEditMode ? "update" : "add"} category.`,
-        {
+        toast.error(response.message, {
           position: "top-right",
           autoClose: 3000,
-        }
-      );
+        });
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message, {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } finally {
       setLoading(false);
     }
@@ -202,7 +179,7 @@ const Category = () => {
     try {
       const response = await deleteCategory(categoryToDelete.id);
       if (response?.status === "success") {
-        toast.success(response?.message || "Category deleted successfully!", {
+        toast.success(response.message, {
           position: "top-right",
           autoClose: 3000,
         });
@@ -210,10 +187,16 @@ const Category = () => {
           prevCategories.filter(({ id }) => id !== categoryToDelete.id)
         );
       } else {
-        toast.error(response?.message || "Failed to delete category.");
+        toast.error(response.message, {
+          position: "top-right",
+          autoClose: 3000,
+        });
       }
     } catch (error) {
-      toast.error(error.response?.data || error.message);
+      toast.error(error.response?.data?.message || error.message, {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } finally {
       setmodal_delete(false);
       setCategoryToDelete(null);
@@ -264,7 +247,6 @@ const Category = () => {
       ),
     },
   ];
-
   return (
     <React.Fragment>
       <Layout>
@@ -350,58 +332,12 @@ const Category = () => {
           handleImageChange={handleImageChange}
         />
 
-        <Modal
-          fade={true}
+        <CategoryModal
           isOpen={modal_delete}
           toggle={tog_delete}
-          className="modal fade zoomIn"
-          id="deleteRecordModal"
-          centered
-        >
-          <div className="modal-header">
-            <Button
-              type="button"
-              onClick={tog_delete}
-              className="btn-close"
-              aria-label="Close"
-            >
-              {" "}
-            </Button>
-          </div>
-          <ModalBody>
-            <div className="mt-2 text-center">
-              <lord-icon
-                src="https://cdn.lordicon.com/gsqxdxog.json"
-                trigger="loop"
-                colors="primary:#f7b84b,secondary:#f06548"
-                className="w-100 h-100"
-              ></lord-icon>
-              <div className="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
-                <h4>Are you Sure ?</h4>
-                <p className="text-muted mx-4 mb-0">
-                  Are you Sure You want to Remove this Record ?
-                </p>
-              </div>
-            </div>
-            <div className="d-flex gap-2 justify-content-center mt-4 mb-2">
-              <button
-                type="button"
-                className="btn w-sm btn-light"
-                onClick={tog_delete}
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                className="btn w-sm btn-danger"
-                id="delete-record"
-                onClick={confirmDelete}
-              >
-                Yes, Delete It!
-              </button>
-            </div>
-          </ModalBody>
-        </Modal>
+          isDeleteModal={true}
+          confirmDelete={confirmDelete}
+        />
       </Layout>
     </React.Fragment>
   );

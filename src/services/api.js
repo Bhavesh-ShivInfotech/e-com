@@ -1,7 +1,12 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { LIST_OF_CATEGORY, DELETE_CATEGORY } from "./apiendpoints";
+import {
+  LIST_OF_CATEGORY,
+  DELETE_CATEGORY,
+  ADD_CATEGORY,
+  EDIT_CATEGORY,
+} from "./apiendpoints";
 import { CallSharp, Category } from "@mui/icons-material";
 const API = axios.create({
   baseURL: "https://e-com-pharmacy-final.onrender.com",
@@ -43,6 +48,15 @@ export const postData = async (endpoint, data) => {
   }
 };
 
+export const putData = async (endpoint, data) => {
+  try {
+    const response = await API.put(endpoint, data);
+    return response.data;
+  } catch (error) {
+    toast.error(error.response?.data);
+    throw error;
+  }
+};
 export const deleteData = async (endpoint, data) => {
   try {
     const response = await API.put(endpoint, { data });
@@ -65,6 +79,34 @@ export const deleteCategory = async (categoryId) => {
   return deleteData(`${DELETE_CATEGORY}/${categoryId}`, {
     is_archived: true,
   });
+};
+
+export const addCategory = async (formData) => {
+  try {
+    const response = await API.post(ADD_CATEGORY, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    toast.error(error.response?.data);
+    return error;
+  }
+};
+
+export const editCategory = async (categoryId, formData) => {
+  try {
+    const response = await API.put(`${EDIT_CATEGORY}/${categoryId}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    toast.error(error.response?.data);
+    return error;
+  }
 };
 
 export default API;
