@@ -32,7 +32,7 @@ import { fetchCategories } from "../../services/api";
 import CommonModal from "../../Components/Common/CommonModal";
 import CommonDeleteModal from "../../Components/Common/CommonDeleteModal";
 import Spinner from "../../Components/Common/Spinner";
-import { HTTP_STATUS_CODES } from "../../Components/constants/httpStatusCodes";
+import { ResponseStatusEnum } from "../../Components/constants/httpStatusCodes";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Category.css";
@@ -133,10 +133,7 @@ const Category = () => {
         ? await editCategory(category.id, formData)
         : await addCategory(formData);
 
-      if (
-        response?.statusCode &&
-        HTTP_STATUS_CODES.SUCCESS.includes(response?.statusCode)
-      ) {
+      if (response?.status === ResponseStatusEnum.SUCCESS) {
         toast.success(response.message);
         setCategory({ id: "", name: "", description: "", image: null });
         setPreview(null);
@@ -146,7 +143,7 @@ const Category = () => {
         toast.error(response.message);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message);
+      toast.error(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -174,10 +171,7 @@ const Category = () => {
 
     try {
       const response = await deleteCategory(categoryToDelete.id);
-      if (
-        response?.statusCode &&
-        HTTP_STATUS_CODES.SUCCESS.includes(response?.statusCode)
-      ) {
+      if (response?.status === ResponseStatusEnum.SUCCESS) {
         toast.success(response.message);
         setCategories((prevCategories) =>
           prevCategories.filter(({ id }) => id !== categoryToDelete.id)
@@ -185,8 +179,8 @@ const Category = () => {
       } else {
         toast.error(response.message);
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message);
     } finally {
       setmodal_delete(false);
       setCategoryToDelete(null);
