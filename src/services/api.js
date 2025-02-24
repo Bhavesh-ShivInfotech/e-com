@@ -29,28 +29,28 @@ API.interceptors.request.use(
   }
 );
 
-// const createMultipartInstance = () => {
-//   const instance = axios.create({
-//     baseURL: API.defaults.baseURL,
-//   });
+const createMultipartInstance = () => {
+  const instance = axios.create({
+    baseURL: API.defaults.baseURL,
+  });
 
-//   instance.interceptors.request.use(
-//     (config) => {
-//       const token = localStorage.getItem("adminToken");
-//       if (token) {
-//         config.headers["Authorization"] = token;
-//       }
-//       config.headers["Content-Type"] = "multipart/form-data";
-//       return config;
-//     },
-//     (error) => {
-//       return Promise.reject(error);
-//     }
-//   );
-//   return instance;
-// };
+  instance.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem("adminToken");
+      if (token) {
+        config.headers["Authorization"] = token;
+      }
+      config.headers["Content-Type"] = "multipart/form-data";
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+  return instance;
+};
 
-// const multipartAPI = createMultipartInstance();
+const multipartAPI = createMultipartInstance();
 export const getData = async (endpoint) => {
   try {
     const response = await API.get(endpoint);
@@ -106,11 +106,7 @@ export const deleteCategory = async (categoryId) => {
 
 export const addCategory = async (formData) => {
   try {
-    const response = await API.post(ADD_CATEGORY, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await multipartAPI.post(ADD_CATEGORY, formData);
     return response.data;
   } catch (error) {
     toast.error(error.response?.data);
@@ -120,11 +116,10 @@ export const addCategory = async (formData) => {
 
 export const editCategory = async (categoryId, formData) => {
   try {
-    const response = await API.put(`${EDIT_CATEGORY}/${categoryId}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await multipartAPI.put(
+      `${EDIT_CATEGORY}/${categoryId}`,
+      formData
+    );
     return response.data;
   } catch (error) {
     toast.error(error.response?.data);
