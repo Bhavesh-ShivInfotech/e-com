@@ -16,11 +16,13 @@ import { Link, useNavigate } from "react-router-dom";
 import withRouter from "../../Components/Common/withRouter";
 import logoLight from "../../assets/images/logo-light.png";
 import SimpleReactValidator from "simple-react-validator";
+import { ResponseStatusEnum } from "../../Components/constants/httpStatusCodes";
 import API from "../../services/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./login.css";
 import { login } from "./authServices";
+import { jwtDecode } from "jwt-decode";
 
 const Login = (props) => {
   const [userLogin, setUserLogin] = useState({ email_id: "", password: "" });
@@ -36,7 +38,6 @@ const Login = (props) => {
   const handleChange = (e) => {
     setUserLogin({ ...userLogin, [e.target.name]: e.target.value });
   };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -48,38 +49,23 @@ const Login = (props) => {
           userLogin.password,
           "Admin"
         );
-
-        if (response && response.data) {
-          localStorage.setItem("adminToken", response.data.token);
-
-          toast.success(response.message || "Login successful!", {
-            position: "top-right",
-            autoClose: 3000,
-          });
-
-          setTimeout(() => {
-            navigate("/dashboard");
-          }, 3000);
+        if (response?.status === ResponseStatusEnum.SUCCESS) {
+          localStorage.setItem("adminToken", response?.data?.token);
+          const decodedToken = jwtDecode(response?.data?.token);
+          const userRole = decodedToken.role;
+          localStorage.setItem("role", userRole);
+          navigate("/dashboard");
+          toast.success(response.message);
         } else {
-          throw new Error("Invalid response from server.");
+          toast.error(response.message);
         }
       } catch (err) {
-        toast.error(
-          err.response?.data?.message || "Login failed. Please try again.",
-          {
-            position: "top-right",
-            autoClose: 3000,
-          }
-        );
+        toast.error(err.response?.data?.message || err.message);
       } finally {
         setLoading(false);
       }
     } else {
       validator.current.showMessages();
-      toast.error("Please fix the validation errors.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
       setLoading(false);
     }
   };
@@ -195,7 +181,6 @@ const Login = (props) => {
           </Container>
         </div>
       </ParticlesAuth>
-
       <ToastContainer position="top-right" autoClose={3000} />
     </React.Fragment>
   );

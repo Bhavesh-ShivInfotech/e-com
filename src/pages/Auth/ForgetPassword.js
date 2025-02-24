@@ -22,7 +22,6 @@ import logoLight from "../../assets/images/logo-light.png";
 import ParticlesAuth from "../AuthenticationInner/ParticlesAuth";
 import { createSelector } from "reselect";
 
-// Initial state for fallback
 const initialState = {
   forgetError: null,
   forgetSuccessMsg: null,
@@ -34,7 +33,6 @@ const ForgetPasswordPage = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // Form Validation
   const validation = useFormik({
     initialValues: { email: "" },
     validationSchema: Yup.object({
@@ -58,7 +56,6 @@ const ForgetPasswordPage = () => {
     },
   });
 
-  // Select Forget Password State with fallback
   const selectLayoutState = (state) => state.ForgetPassword || initialState;
   const selectLayoutProperties = createSelector(selectLayoutState, (state) => ({
     forgetError: state.forgetError,
@@ -99,7 +96,6 @@ const ForgetPasswordPage = () => {
                     ></lord-icon>
                   </div>
 
-                  {/* Displaying message dynamically */}
                   <Alert color="warning" className="text-center mb-3 mx-2 mt-3">
                     {message || "Enter your email and OTP will be sent to you!"}
                   </Alert>

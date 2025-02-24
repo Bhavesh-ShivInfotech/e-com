@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
@@ -19,25 +19,24 @@ import {
 } from "reactstrap";
 import { ClipLoader } from "react-spinners";
 import Layout from "../../Layouts/index";
-import API, { deleteCategory } from "../../services/api";
+import API, {
+  deleteCategory,
+  addCategory,
+  editCategory,
+} from "../../services/api";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "bootstrap/dist/css/bootstrap.min.css";
 import Pagination from "../../Components/Common/Pagination";
-import "./Category.css";
-import "../../index.css";
 import SimpleReactValidator from "simple-react-validator";
 import BaseTable from "../Table/BaseTable";
 import { fetchCategories } from "../../services/api";
-import { ADD_CATEGORY, EDIT_CATEGORY } from "../../services/apiendpoints";
-import CategoryModal from "./CategoryModal";
-const Spinner = () => {
-  return (
-    <div className="spinner-container ">
-      <ClipLoader color="#007bff" size={50} />
-    </div>
-  );
-};
+import CommonModal from "../../Components/Common/CommonModal";
+import CommonDeleteModal from "../../Components/Common/CommonDeleteModal";
+import Spinner from "../../Components/Common/Spinner";
+import { ResponseStatusEnum } from "../../Components/constants/httpStatusCodes";
+import "react-toastify/dist/ReactToastify.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./Category.css";
+import "../../index.css";
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
@@ -73,34 +72,27 @@ const Category = () => {
     }
   };
 
-  // const tog_delete = () => {
-  //   console.log("Before toggle: model_delete =", modal_delete);
-  //   setmodal_delete(!modal_delete);
-  //   console.log("After toggle: model_delete =", !modal_delete);
-  // };
-
   const tog_delete = () => {
     setmodal_delete((prev) => {
-      console.log("Before toggle: model_delete =", prev);
       const newState = !prev;
-      console.log("After toggle: modal_delete =", newState);
       return newState;
     });
   };
 
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const response = await fetchCategories();
-        setCategories(response.data || []);
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadCategories();
+  const loadCategories = useCallback(async () => {
+    try {
+      const response = await fetchCategories();
+      setCategories(response.data || []);
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
 
   const handleRowsPerPageChange = (e) => {
     setRowsPerPage(Number(e.target.value));
@@ -137,50 +129,21 @@ const Category = () => {
     formData.append("image", category.image);
 
     try {
-      const endpoint = isEditMode
-        ? `${EDIT_CATEGORY}/${category.id}`
-        : ADD_CATEGORY;
-      const method = isEditMode ? "put" : "post";
+      const response = isEditMode
+        ? await editCategory(category.id, formData)
+        : await addCategory(formData);
 
-      const response = await API[method](endpoint, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (response?.data?.status === "success") {
-        toast.success(
-          response.data.message ||
-            `Category ${isEditMode ? "updated" : "added"} successfully!`,
-          {
-            position: "top-right",
-            autoClose: 3000,
-          }
-        );
-
+      if (response?.status === ResponseStatusEnum.SUCCESS) {
+        toast.success(response.message);
         setCategory({ id: "", name: "", description: "", image: null });
         setPreview(null);
         tog_list();
         navigate("/category");
       } else {
-        toast.error(
-          response.data.message ||
-            `Failed to ${isEditMode ? "update" : "add"} category.`,
-          {
-            position: "top-right",
-            autoClose: 3000,
-          }
-        );
+        toast.error(response.message);
       }
     } catch (err) {
-      toast.error(
-        err.response?.data?.message ||
-          `Failed to ${isEditMode ? "update" : "add"} category.`,
-        {
-          position: "top-right",
-          autoClose: 3000,
-        }
-      );
+      toast.error(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -208,22 +171,16 @@ const Category = () => {
 
     try {
       const response = await deleteCategory(categoryToDelete.id);
-      if (response?.status === "success") {
-        toast.success(response?.message || "Category deleted successfully!", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-        // setCategories(
-        //   categories.filter(({ id }) => id !== categoryToDelete.id)
-        // );
+      if (response?.status === ResponseStatusEnum.SUCCESS) {
+        toast.success(response.message);
         setCategories((prevCategories) =>
           prevCategories.filter(({ id }) => id !== categoryToDelete.id)
         );
       } else {
-        toast.error(response?.message || "Failed to delete category.");
+        toast.error(response.message);
       }
-    } catch (error) {
-      toast.error(error.response?.data || error.message);
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message);
     } finally {
       setmodal_delete(false);
       setCategoryToDelete(null);
@@ -250,12 +207,7 @@ const Category = () => {
       key: "image",
       title: "Image",
       render: (image) => (
-        <img
-          src={image}
-          alt="Category"
-          className="img-thumbnail"
-          style={{ width: "80px", height: "80px" }}
-        />
+        <img src={image} alt="Category" className="img-thumbnail w-75 h-75" />
       ),
     },
     {
@@ -279,7 +231,6 @@ const Category = () => {
       ),
     },
   ];
-
   return (
     <React.Fragment>
       <Layout>
@@ -351,73 +302,103 @@ const Category = () => {
           </div>
         )}
 
-        <CategoryModal
+        <CommonModal
+          fade={true}
           isOpen={modal_list}
           toggle={tog_list}
-          isEditMode={isEditMode}
-          category={category}
-          setCategory={setCategory}
-          preview={preview}
-          setPreview={setPreview}
-          validator={validator}
-          handleSubmit={handleSubmit}
-          handleChange={handleChange}
-          handleImageChange={handleImageChange}
-        />
-
-        {/* Delete Model */}
-        <Modal
-          fade={true}
-          isOpen={modal_delete}
-          toggle={tog_delete}
-          className="modal fade zoomIn"
-          id="deleteRecordModal"
-          centered
-        >
-          <div className="modal-header">
-            <Button
-              type="button"
-              onClick={tog_delete}
-              className="btn-close"
-              aria-label="Close"
-            >
-              {" "}
-            </Button>
-          </div>
-          <ModalBody>
-            <div className="mt-2 text-center">
-              <lord-icon
-                src="https://cdn.lordicon.com/gsqxdxog.json"
-                trigger="loop"
-                colors="primary:#f7b84b,secondary:#f06548"
-                style={{ width: "100px", height: "100px" }}
-              ></lord-icon>
-              <div className="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
-                <h4>Are you Sure ?</h4>
-                <p className="text-muted mx-4 mb-0">
-                  Are you Sure You want to Remove this Record ?
-                </p>
-              </div>
-            </div>
-            <div className="d-flex gap-2 justify-content-center mt-4 mb-2">
+          title={isEditMode ? "Edit Category" : "Add Category"}
+          footerButtons={
+            <>
               <button
                 type="button"
-                className="btn w-sm btn-light"
-                onClick={tog_delete}
+                className="btn btn-light"
+                onClick={tog_list}
               >
                 Close
               </button>
               <button
-                type="button"
-                className="btn w-sm btn-danger"
-                id="delete-record"
-                onClick={confirmDelete}
+                type="submit"
+                className="btn btn-success"
+                onClick={handleSubmit}
               >
-                Yes, Delete It!
+                {isEditMode ? "Update Category" : "Add Category"}
               </button>
+            </>
+          }
+        >
+          <Form className="tablelist-form" onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <Label
+                htmlFor="categoryName"
+                className="form-label text-start w-100"
+              >
+                Category Name
+              </Label>
+              <Input
+                type="text"
+                id="categoryName"
+                className="form-control"
+                placeholder="Enter Category Name"
+                name="name"
+                value={category.name}
+                onChange={handleChange}
+              />
+              {validator.message("name", category.name, "required")}
             </div>
-          </ModalBody>
-        </Modal>
+
+            <div className="mb-3">
+              <Label
+                htmlFor="categoryDescription"
+                className="form-label text-start w-100"
+              >
+                Description
+              </Label>
+              <Input
+                type="textarea"
+                id="categoryDescription"
+                className="form-control"
+                placeholder="Enter Description"
+                name="description"
+                value={category.description}
+                onChange={handleChange}
+              />
+              {validator.message(
+                "description",
+                category.description,
+                "required"
+              )}
+            </div>
+
+            <div className="mb-3">
+              <Label
+                htmlFor="categoryImage"
+                className="form-label text-start w-100"
+              >
+                Category Image
+              </Label>
+              <Input
+                type="file"
+                id="categoryImage"
+                className="mb-2"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+              {validator.message("image", category.image, "required")}
+              {preview && (
+                <div className="img-preview">
+                  <img src={preview} alt="Preview" className="preview-img" />
+                </div>
+              )}
+            </div>
+          </Form>
+        </CommonModal>
+
+        <CommonDeleteModal
+          isOpen={modal_delete}
+          toggle={tog_delete}
+          message="Are you Sure You want to Remove this Record?"
+          confirmDelete={confirmDelete}
+        />
       </Layout>
     </React.Fragment>
   );

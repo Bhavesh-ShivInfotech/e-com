@@ -20,7 +20,6 @@ const Pagination = ({
   return (
     <React.Fragment>
       <Row className="align-items-center justify-content-between mb-4">
-        {/* Left side: Rows per page */}
         <Col xs="auto">
           <div className="d-flex align-items-center">
             <label htmlFor="rowsPerPage" className="me-2 fw-bold">
@@ -38,8 +37,6 @@ const Pagination = ({
             </select>
           </div>
         </Col>
-
-        {/* Right side: Pagination */}
         <Col xs="auto">
           <ul className="pagination pagination-separated mb-0">
             <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
