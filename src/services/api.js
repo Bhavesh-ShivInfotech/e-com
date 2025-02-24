@@ -7,6 +7,8 @@ import {
   ADD_CATEGORY,
   EDIT_CATEGORY,
 } from "./apiendpoints";
+import { CallSharp, Category } from "@mui/icons-material";
+// import { config } from "webpack";
 const API = axios.create({
   baseURL: "https://e-com-pharmacy-final.onrender.com",
   headers: {
