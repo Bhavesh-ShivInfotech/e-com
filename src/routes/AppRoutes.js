@@ -6,7 +6,7 @@ import Dashboard from "../pages/Dashboard";
 import Category from "../pages/Category/Category";
 import NotFound from "../pages/NotFound/NotFound";
 import Product from "../pages/Product/Product";
-// import AddCategory from "../pages/Category/AddCategory";
+import AddProduct from "../pages/Product/AddProduct";
 
 const AppRoutes = () => {
   const isAuthenticated = !!localStorage.getItem("adminToken");
@@ -29,7 +29,7 @@ const AppRoutes = () => {
 
       <Route path="*" element={<NotFound />} />
       <Route path="/product" element={<Product />} />
-      {/* <Route path="/addproduct" element={<AddProduct />} /> */}
+      <Route path="/addproduct" element={<AddProduct />} />
     </Routes>
   );
 };

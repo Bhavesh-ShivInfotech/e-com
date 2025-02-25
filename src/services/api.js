@@ -8,6 +8,7 @@ import {
   EDIT_CATEGORY,
   DELETE_PRODUCT,
   LIST_OF_PRODUCT,
+  ADD_PRODUCT,
 } from "./apiendpoints";
 import { CallSharp, Category } from "@mui/icons-material";
 // import { config } from "webpack";
@@ -143,6 +144,16 @@ export const deleteProduct = async (productId) => {
   return deleteData(`${DELETE_PRODUCT}/${productId}`, {
     is_archived: true,
   });
+};
+
+export const addProduct = async (formData) => {
+  try {
+    const response = await multipartAPI.post(ADD_PRODUCT, formData);
+    return response.data;
+  } catch (error) {
+    toast.error(error.response?.data);
+    return error;
+  }
 };
 
 export default API;
