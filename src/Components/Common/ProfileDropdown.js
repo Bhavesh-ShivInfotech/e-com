@@ -18,7 +18,8 @@ const ProfileDropdown = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
+    sessionStorage.removeItem("authUser");
+    sessionStorage.removeItem("role");
     navigate("/login");
   };
 
