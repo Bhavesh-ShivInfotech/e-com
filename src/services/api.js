@@ -6,6 +6,8 @@ import {
   DELETE_CATEGORY,
   ADD_CATEGORY,
   EDIT_CATEGORY,
+  DELETE_PRODUCT,
+  LIST_OF_PRODUCT,
 } from "./apiendpoints";
 import { CallSharp, Category } from "@mui/icons-material";
 // import { config } from "webpack";
@@ -125,6 +127,22 @@ export const editCategory = async (categoryId, formData) => {
     toast.error(error.response?.data);
     return error;
   }
+};
+
+export const fetchProducts = async () => {
+  try {
+    const response = await API.post(LIST_OF_PRODUCT);
+    return response?.data;
+  } catch (error) {
+    toast.error(error.response?.data || "Error fetching products");
+    throw error;
+  }
+};
+
+export const deleteProduct = async (productId) => {
+  return deleteData(`${DELETE_PRODUCT}/${productId}`, {
+    is_archived: true,
+  });
 };
 
 export default API;

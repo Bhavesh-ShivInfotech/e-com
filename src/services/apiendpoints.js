@@ -14,3 +14,10 @@ export const DELETE_CATEGORY = "/api/category/deleteCategory";
 //Login
 
 export const LOGIN = "/api/admin/login";
+
+//Product
+
+export const LIST_OF_PRODUCT = "/api/product/listOfProducts";
+export const ADD_PRODUCT = "/api/product/addProduct";
+export const EDIT_PRODUCT = "/api/product/editProduct";
+export const DELETE_PRODUCT = "/api/product/deleteProduct";
