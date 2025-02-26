@@ -56,13 +56,10 @@ const Login = (props) => {
         );
         if (response?.status === ResponseStatusEnum.SUCCESS) {
           localStorage.setItem("adminToken", response?.data?.token);
-
           const decodedToken = jwtDecode(response?.data?.token);
           const userRole = decodedToken.role;
           localStorage.setItem("role", userRole);
-
           navigate("/dashboard");
-
           toast.success(response.message);
           console.log("if", response.message);
         } else {
