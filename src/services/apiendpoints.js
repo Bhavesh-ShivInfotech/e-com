@@ -21,3 +21,4 @@ export const LIST_OF_PRODUCT = "/api/product/listOfProducts";
 export const ADD_PRODUCT = "/api/product/addProduct";
 export const EDIT_PRODUCT = "/api/product/editProduct";
 export const DELETE_PRODUCT = "/api/product/deleteProduct";
+export const CHANGE_IMAGE = "/api/vendor/productImage";

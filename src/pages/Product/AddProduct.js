@@ -12,10 +12,10 @@ import {
   Tab,
   Spinner,
 } from "react-bootstrap";
-import * as Dropzone from "react-dropzone";
+import Dropzone from "react-dropzone";
 import Layout from "../../Layouts/index";
 import { toast } from "react-toastify";
-import { fetchCategories, addProduct, editProduct,  } from "../../services/api";
+import { fetchCategories, addProduct } from "../../services/api";
 import "react-toastify/dist/ReactToastify.css";
 import { ResponseStatusEnum } from "../../Components/constants/httpStatusCodes";
 import "bootstrap/dist/css/bootstrap.min.css";

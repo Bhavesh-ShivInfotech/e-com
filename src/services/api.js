@@ -10,6 +10,7 @@ import {
   LIST_OF_PRODUCT,
   ADD_PRODUCT,
   EDIT_PRODUCT,
+  CHANGE_IMAGE,
 } from "./apiendpoints";
 import { CallSharp, Category } from "@mui/icons-material";
 // import { config } from "webpack";
@@ -157,10 +158,10 @@ export const addProduct = async (formData) => {
   }
 };
 
-export const editProduct = async (categoryId, formData) => {
+export const editProduct = async (productId, formData) => {
   try {
     const response = await multipartAPI.put(
-      `${EDIT_PRODUCT}/${categoryId}`,
+      `${EDIT_PRODUCT}/${productId}`,
       formData
     );
     return response.data;
@@ -170,10 +171,10 @@ export const editProduct = async (categoryId, formData) => {
   }
 };
 
-export const editImage = async (categoryId, formData) => {
+export const editImage = async (productId, formData) => {
   try {
     const response = await multipartAPI.post(
-      `${EDIT_PRODUCT}/${categoryId}`,
+      `${CHANGE_IMAGE}/${productId}`,
       formData
     );
     return response.data;
