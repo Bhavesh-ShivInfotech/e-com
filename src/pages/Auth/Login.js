@@ -12,7 +12,7 @@ import {
   Spinner,
 } from "reactstrap";
 import ParticlesAuth from "../AuthenticationInner/ParticlesAuth";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import withRouter from "../../Components/Common/withRouter";
 import logoLight from "../../assets/images/logo-light.png";
 import SimpleReactValidator from "simple-react-validator";
@@ -42,6 +42,7 @@ const Login = (props) => {
   const getValidationMessage = (fieldName, value, rules) => {
     return validator.current.message(fieldName, value, rules);
   };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -55,16 +56,22 @@ const Login = (props) => {
         );
         if (response?.status === ResponseStatusEnum.SUCCESS) {
           localStorage.setItem("adminToken", response?.data?.token);
+
           const decodedToken = jwtDecode(response?.data?.token);
           const userRole = decodedToken.role;
           localStorage.setItem("role", userRole);
+
           navigate("/dashboard");
+
           toast.success(response.message);
+          console.log("if", response.message);
         } else {
           toast.error(response.message);
+          console.log("else", response.message);
         }
       } catch (err) {
         toast.error(err.response?.data?.message || err.message);
+        console.log("catch", err.response?.data?.message || err.message);
       } finally {
         setLoading(false);
       }
