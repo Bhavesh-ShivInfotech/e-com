@@ -61,14 +61,11 @@ const Login = (props) => {
           localStorage.setItem("role", userRole);
           navigate("/dashboard");
           toast.success(response.message);
-          console.log("if", response.message);
         } else {
           toast.error(response.message);
-          console.log("else", response.message);
         }
       } catch (err) {
         toast.error(err.response?.data?.message || err.message);
-        console.log("catch", err.response?.data?.message || err.message);
       } finally {
         setLoading(false);
       }
