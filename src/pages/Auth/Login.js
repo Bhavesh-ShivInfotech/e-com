@@ -18,7 +18,7 @@ import logoLight from "../../assets/images/logo-light.png";
 import SimpleReactValidator from "simple-react-validator";
 import { ResponseStatusEnum } from "../../Components/constants/httpStatusCodes";
 import API from "../../services/api";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./login.css";
 import { login } from "./authServices";
@@ -37,6 +37,10 @@ const Login = (props) => {
 
   const handleChange = (e) => {
     setUserLogin({ ...userLogin, [e.target.name]: e.target.value });
+  };
+
+  const getValidationMessage = (fieldName, value, rules) => {
+    return validator.current.message(fieldName, value, rules);
   };
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -108,7 +112,7 @@ const Login = (props) => {
                             value={userLogin.email_id}
                             onChange={handleChange}
                           />
-                          {validator.current.message(
+                          {getValidationMessage(
                             "email_id",
                             userLogin.email_id,
                             "required|email"
@@ -116,11 +120,6 @@ const Login = (props) => {
                         </div>
 
                         <div className="mb-3">
-                          <div className="float-end">
-                            <Link to="/forgot-password" className="text-muted">
-                              Forgot password?
-                            </Link>
-                          </div>
                           <Label
                             className="form-label"
                             htmlFor="password-input"
@@ -137,7 +136,7 @@ const Login = (props) => {
                               onChange={handleChange}
                               autoComplete="new-password"
                             />
-                            {validator.current.message(
+                            {getValidationMessage(
                               "password",
                               userLogin.password,
                               "required|min:6"
@@ -181,7 +180,6 @@ const Login = (props) => {
           </Container>
         </div>
       </ParticlesAuth>
-      <ToastContainer position="top-right" autoClose={3000} />
     </React.Fragment>
   );
 };

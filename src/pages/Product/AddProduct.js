@@ -78,14 +78,6 @@ const AddProduct = () => {
     setProduct({ ...product, [name]: value });
   };
 
-  //   const handleImageChange = (e) => {
-  //     const file = e.target.files[0];
-  //     if (file) {
-  //       setProduct({ ...product, selectedImage: file });
-  //       setPreview(URL.createObjectURL(file));
-  //     }
-  //   };
-
   const handleAcceptedFiles = (acceptedFiles) => {
     const updatedFiles = acceptedFiles.map((file) =>
       Object.assign(file, {
@@ -121,11 +113,6 @@ const AddProduct = () => {
         setLoading(false);
         return;
       }
-
-      // const formData = new FormData();
-      // Object.keys(product).forEach((key) => {
-      //   formData.append(key, product[key]);
-      // });
 
       const formData = new FormData();
 
@@ -531,7 +518,7 @@ const AddProduct = () => {
                           {({ getRootProps, getInputProps }) => (
                             <div
                               {...getRootProps()}
-                              className="dropzone dz-clickable"
+                              className="dropzone dz-clickable "
                               style={{
                                 border: "2px dashed #ccc",
                                 padding: "20px",
@@ -541,7 +528,7 @@ const AddProduct = () => {
                             >
                               <input {...getInputProps()} />
                               <div className="dz-message needsclick">
-                                <div className="mb-3">
+                                <div className="mb-2">
                                   <i className="display-4 text-muted ri-upload-cloud-2-fill" />
                                 </div>
                                 <h5>Drop files here or click to upload.</h5>
