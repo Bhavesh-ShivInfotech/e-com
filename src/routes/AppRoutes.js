@@ -27,7 +27,8 @@ const AppRoutes = () => {
 
       <Route path="*" element={<NotFound />} />
       <Route path="/product" element={<Product />} />
-      <Route path="/addproduct" element={<AddProduct />} />
+      <Route path="/add-product" element={<AddProduct />} />
+      <Route path="/edit-product/:id" element={<AddProduct />} />
     </Routes>
   );
 };

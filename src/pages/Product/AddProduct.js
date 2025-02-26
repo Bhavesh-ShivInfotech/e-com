@@ -1,31 +1,19 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import {
-  Col,
-  Container,
-  Row,
-  Form,
-  Button,
-  Card,
-  Nav,
-  Tabs,
-  Tab,
-  Spinner,
-} from "react-bootstrap";
-import Dropzone from "react-dropzone";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Col, Container, Row, Form, Button } from "react-bootstrap";
 import Layout from "../../Layouts/index";
-import { toast } from "react-toastify";
-import { fetchCategories, addProduct } from "../../services/api";
+import API from "../../services/api";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { ResponseStatusEnum } from "../../Components/constants/httpStatusCodes";
+import { Spinner } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Product.css";
-import SimpleReactValidator from "simple-react-validator";
 
-const AddProduct = () => {
+const ProductForm = ({ isEditMode = false }) => {
+  const { id } = useParams(); // Get product ID for edit mode
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("general");
+  const [activeTab, setActiveTab] = useState("General");
   const [categories, setCategories] = useState([]);
   const [product, setProduct] = useState({
     is_prescription: true,
@@ -45,101 +33,143 @@ const AddProduct = () => {
     dose: "",
     selectedImage: null,
   });
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [newImage, setNewImage] = useState(null); // For storing the uploaded image URL
+  const [preview, setPreview] = useState(null); // For image preview
 
-  const validator = useRef(
-    new SimpleReactValidator({
-      className: "error-message",
-      autoForceUpdate: this,
-    })
-  );
-
-  const getValidationMessage = (fieldName, value, rules) => {
-    return validator.current.message(fieldName, value, rules);
-  };
-
-  const loadCategories = useCallback(async () => {
-    try {
-      const response = await fetchCategories();
-      setCategories(response.data || []);
-    } catch (err) {
-      console.error("Error fetching categories:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
+  // Fetch categories and product details (if in edit mode)
   useEffect(() => {
-    loadCategories();
-  }, [loadCategories]);
+    const fetchCategories = async () => {
+      try {
+        const response = await API.post("/api/category/listOfCategory", {
+          model: "Category",
+          limit: 500,
+          condition: { is_archived: false },
+        });
+        setCategories(response.data?.data || []);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    const fetchProductDetails = async () => {
+      if (isEditMode && id) {
+        try {
+          const response = await API.get(`/api/product/getProduct/${id}`);
+          const productData = response.data?.data;
+          if (productData) {
+            setProduct({
+              ...productData,
+              category_id: productData.category_id || "",
+              selectedImage: productData.image || null,
+            });
+            setPreview(productData.image || null); // Set preview for existing image
+          }
+        } catch (error) {
+          console.error("Error fetching product details:", error);
+        }
+      }
+    };
+
+    fetchCategories();
+    if (isEditMode) fetchProductDetails();
+  }, [id, isEditMode]);
+
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProduct({ ...product, [name]: value });
   };
 
-  const handleAcceptedFiles = (acceptedFiles) => {
-    const updatedFiles = acceptedFiles.map((file) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-        formattedSize: formatBytes(file.size),
-      })
-    );
-    setSelectedFiles(updatedFiles);
-    setProduct({ ...product, selectedImage: acceptedFiles[0] });
-  };
-
-  const formatBytes = (bytes, decimals = 2) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (validator.current.allValid()) {
-      setLoading(true);
-
-      if (
-        !product.name ||
-        !product.description ||
-        !product.selectedImage ||
-        !product.category_id
-      ) {
-        toast.error("Please fill all required fields!");
-        setLoading(false);
-        return;
-      }
-
+  // Handle image upload
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
       const formData = new FormData();
-
-      Object.keys(product).forEach((key) => {
-        if (key === "selectedImage") {
-          formData.append("image", product[key]);
-        } else {
-          formData.append(key, product[key]);
-        }
-      });
-
+      formData.append("image", file);
       try {
-        const response = await addProduct(formData);
-        if (response?.status === ResponseStatusEnum.SUCCESS) {
-          toast.success(response.message);
-          navigate("/product");
+        const response = await API.post("/api/vendor/productImage", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        if (response?.data?.status === "success") {
+          toast.success(
+            response.data.message || "Image uploaded successfully!"
+          );
+          setNewImage(response?.data?.data?.[0]); // Set the uploaded image URL
+          setPreview(URL.createObjectURL(file)); // Set the preview URL
         } else {
-          toast.error(response.message);
+          toast.error(response?.data?.message || "Failed to upload image.");
         }
       } catch (error) {
-        toast.error(error.response?.data?.message || error.message);
-      } finally {
-        setLoading(false);
+        toast.error("Something went wrong! Please try again.");
       }
-    } else {
-      validator.current.showMessages();
-      toast.error("Please fix the validation errors.");
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData();
+    Object.keys(product).forEach((key) => {
+      if (product[key] !== null && product[key] !== undefined) {
+        formData.append(key, product[key]);
+      }
+    });
+
+    // Use the uploaded image URL if available
+    if (newImage) {
+      formData.append("selectedImage", newImage);
+    }
+
+    try {
+      const endpoint = isEditMode
+        ? `/api/product/editProduct/${id}`
+        : "/api/product/addProduct";
+      const method = isEditMode ? "put" : "post";
+
+      const response = await API[method](endpoint, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response?.data?.status === "success") {
+        toast.success(
+          response.data.message ||
+            (isEditMode
+              ? "Product updated successfully!"
+              : "Product added successfully!"),
+          {
+            position: "top-right",
+            autoClose: 3000,
+          }
+        );
+        navigate("/product");
+      } else {
+        toast.error(
+          response?.data?.message ||
+            (isEditMode
+              ? "Failed to update product."
+              : "Failed to add product."),
+          {
+            position: "top-right",
+            autoClose: 3000,
+          }
+        );
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong! Please try again.",
+        {
+          position: "top-right",
+          autoClose: 3000,
+        }
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -147,10 +177,12 @@ const AddProduct = () => {
     <React.Fragment>
       <Layout>
         <div className="page-content ">
-          <Container fluid className="px-4 mb-4 addproduct-container">
-            <Row className="align-items-center addproduct-title">
+          <Container fluid className="px-4 mb-4 product-container">
+            <Row className="align-items-center mb-4">
               <Col>
-                <h2 className="mb-0">Add Product</h2>
+                <h2 className="mb-0">
+                  {isEditMode ? "Edit Product" : "Add Product"}
+                </h2>
               </Col>
               <Col className="text-end">
                 <Button variant="secondary" onClick={() => navigate(-1)}>
@@ -161,447 +193,280 @@ const AddProduct = () => {
 
             <Row>
               <Col xl={12} md={12}>
-                <Card className="mt-xxl-n5">
-                  <Card.Header>
-                    <Tabs
-                      activeKey={activeTab}
-                      onSelect={(k) => setActiveTab(k)}
-                      className="nav-tabs-custom rounded card-header-tabs border-bottom-0"
+                <div className="tabs mb-4">
+                  {["General", "Data", "Image"].map((tab) => (
+                    <Button
+                      key={tab}
+                      variant="outline-primary"
+                      className={`me-2 ${
+                        activeTab === tab ? "active-tab" : ""
+                      }`}
+                      onClick={() => setActiveTab(tab)}
                     >
-                      <Tab eventKey="general" title="General Information" />
-                      <Tab eventKey="data" title="Product Data" />
-                      <Tab eventKey="image" title="Product Image" />
-                    </Tabs>
-                  </Card.Header>
-                  <Form onSubmit={handleSubmit} encType="multipart/form-data">
-                    {activeTab === "general" && (
-                      <div className="section p-4 border rounded">
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Product Name</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="name"
-                                value={product.name}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor("name")
-                                }
-                                required
-                              />
-                              {getValidationMessage(
-                                "name",
-                                product.name,
-                                "required|min:3|max:50"
-                              )}
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Category</Form.Label>
-                              <Form.Select
-                                name="category_id"
-                                value={product.category_id}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "category_id"
-                                  )
-                                }
-                                required
-                              >
-                                <option value="">Select Category</option>
-                                {categories.map((cat) => (
-                                  <option key={cat.id} value={cat.id}>
-                                    {cat.name}
-                                  </option>
-                                ))}
-                              </Form.Select>
-                              {getValidationMessage(
-                                "category_id",
-                                product.category_id,
-                                "required"
-                              )}
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col md={12}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Product Description</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="description"
-                                value={product.description}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "description"
-                                  )
-                                }
-                                required
-                              />
-                              {getValidationMessage(
-                                "description",
-                                product.description,
-                                "required"
-                              )}
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Price</Form.Label>
-                              <Form.Control
-                                type="number"
-                                name="price"
-                                value={product.price}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor("price")
-                                }
-                                required
-                              />
-                              {getValidationMessage(
-                                "price",
-                                product.price,
-                                "required"
-                              )}
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Quantity</Form.Label>
-                              <Form.Control
-                                type="number"
-                                name="quantity"
-                                value={product.quantity}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor("quantity")
-                                }
-                                required
-                              />
-                              {getValidationMessage(
-                                "quantity",
-                                product.quantity,
-                                "required"
-                              )}
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col md={12}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Meta Tag Title</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="metaTagTitle"
-                                value={product.metaTagTitle}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "metaTagTitle"
-                                  )
-                                }
-                                required
-                              />
-                              {getValidationMessage(
-                                "metaTagTitle",
-                                product.metaTagTitle,
-                                "required"
-                              )}
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col md={12}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Meta Tag Description</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="metaTagDescription"
-                                value={product.metaTagDescription}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "metaTagDescription"
-                                  )
-                                }
-                                required
-                              />
-                              {getValidationMessage(
-                                "metaTagDescription",
-                                product.metaTagDescription,
-                                "required"
-                              )}
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col md={12}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Meta Tag Keywords</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="metaTagKeywords"
-                                value={product.metaTagKeywords}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "metaTagKeywords"
-                                  )
-                                }
-                                required
-                              />
-                              {getValidationMessage(
-                                "metaTagKeywords",
-                                product.metaTagKeywords,
-                                "required"
-                              )}
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                      </div>
-                    )}
-
-                    {activeTab === "data" && (
-                      <div className="section p-4 border rounded">
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Composition</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="composition"
-                                value={product.composition}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "composition"
-                                  )
-                                }
-                                required
-                              />
-                              {getValidationMessage(
-                                "composition",
-                                product.composition,
-                                "required"
-                              )}
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Presentation</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="presentation"
-                                value={product.presentation}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "presentation"
-                                  )
-                                }
-                                required
-                              />
-                              {getValidationMessage(
-                                "presentation",
-                                product.presentation,
-                                "required"
-                              )}
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Storage</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="storage"
-                                value={product.storage}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor("storage")
-                                }
-                                required
-                              />
-                              {getValidationMessage(
-                                "storage",
-                                product.storage,
-                                "required"
-                              )}
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Indication</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="indication"
-                                value={product.indication}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor("indication")
-                                }
-                                required
-                              />
-                              {getValidationMessage(
-                                "indication",
-                                product.indication,
-                                "required"
-                              )}
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Dose</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="dose"
-                                value={product.dose}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor("dose")
-                                }
-                                required
-                              />
-                              {getValidationMessage(
-                                "dose",
-                                product.dose,
-                                "required"
-                              )}
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Shelf Life</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="shelfLife"
-                                value={product.shelfLife}
-                                onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor("shelfLife")
-                                }
-                                required
-                              />
-                              {getValidationMessage(
-                                "shelfLife",
-                                product.shelfLife,
-                                "required"
-                              )}
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                      </div>
-                    )}
-
-                    {activeTab === "image" && (
-                      <div className="section p-4 border rounded">
-                        <h5 className="fs-15 mb-1">Product Gallery</h5>
-                        <p className="text-muted">
-                          Add Product Gallery Images.
-                        </p>
-                        <Dropzone
-                          onDrop={(acceptedFiles) => {
-                            handleAcceptedFiles(acceptedFiles);
-                          }}
-                          accept="image/*"
-                          multiple={false}
-                        >
-                          {({ getRootProps, getInputProps }) => (
-                            <div
-                              {...getRootProps()}
-                              className="dropzone dz-clickable "
-                              style={{
-                                border: "2px dashed #ccc",
-                                padding: "20px",
-                                textAlign: "center",
-                                cursor: "pointer",
-                              }}
+                      {tab}
+                    </Button>
+                  ))}
+                </div>
+                <Form onSubmit={handleSubmit} encType="multipart/form-data">
+                  {activeTab === "General" && (
+                    <div className="section p-4 border rounded">
+                      <h4 className="mb-4">General Information</h4>
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Product Name</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="name"
+                              value={product.name}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Category</Form.Label>
+                            <Form.Select
+                              name="category_id"
+                              value={product.category_id}
+                              onChange={handleChange}
+                              required
                             >
-                              <input {...getInputProps()} />
-                              <div className="dz-message needsclick">
-                                <div className="mb-2">
-                                  <i className="display-4 text-muted ri-upload-cloud-2-fill" />
-                                </div>
-                                <h5>Drop files here or click to upload.</h5>
-                              </div>
-                            </div>
-                          )}
-                        </Dropzone>
-                        <div className="list-unstyled mb-0" id="file-previews">
-                          {selectedFiles.map((f, i) => (
-                            <Card
-                              className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete"
-                              key={i + "-file"}
-                            >
-                              <div className="p-2">
-                                <Row className="align-items-center">
-                                  <Col className="col-auto">
-                                    <img
-                                      data-dz-thumbnail=""
-                                      height="80"
-                                      className="avatar-sm rounded bg-light"
-                                      alt={f.name}
-                                      src={f.preview}
-                                    />
-                                  </Col>
-                                  <Col>
-                                    <Link
-                                      to="#"
-                                      className="text-muted font-weight-bold"
-                                    >
-                                      {f.name}
-                                    </Link>
-                                    <p className="mb-0">
-                                      <strong>{f.formattedSize}</strong>
-                                    </p>
-                                  </Col>
-                                  <Col className="col-auto">
-                                    <Button
-                                      variant="danger"
-                                      size="sm"
-                                      onClick={() => {
-                                        const updatedFiles =
-                                          selectedFiles.filter(
-                                            (file, index) => index !== i
-                                          );
-                                        setSelectedFiles(updatedFiles);
+                              <option value="">Select Category</option>
+                              {categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                  {cat.name}
+                                </option>
+                              ))}
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col md={12}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Product Description</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="description"
+                              value={product.description}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Price</Form.Label>
+                            <Form.Control
+                              type="number"
+                              name="price"
+                              value={product.price}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Quantity</Form.Label>
+                            <Form.Control
+                              type="number"
+                              name="quantity"
+                              value={product.quantity}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col md={12}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Meta Tag Title</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="metaTagTitle"
+                              value={product.metaTagTitle}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col md={12}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Meta Tag Description</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="metaTagDescription"
+                              value={product.metaTagDescription}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col md={12}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Meta Tag Keywords</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="metaTagKeywords"
+                              value={product.metaTagKeywords}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                    </div>
+                  )}
 
-                                        if (updatedFiles.length === 0) {
-                                          setProduct({
-                                            ...product,
-                                            selectedImage: null,
-                                          });
-                                        }
-                                      }}
-                                    >
-                                      Delete
-                                    </Button>
-                                  </Col>
-                                </Row>
+                  {activeTab === "Data" && (
+                    <div className="section p-4 border rounded">
+                      <h4 className="mb-4">Product Data</h4>
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Composition</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="composition"
+                              value={product.composition}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Presentation</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="presentation"
+                              value={product.presentation}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Storage</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="storage"
+                              value={product.storage}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Indication</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="indication"
+                              value={product.indication}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Dose</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="dose"
+                              value={product.dose}
+                              onChange={handleChange}
+                              required
+                            />
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Shelf Life</Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="shelfLife"
+                              value={product.shelfLife}
+                              onChange={handleChange}
+                              disabled={isEditMode}
+                            />
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                    </div>
+                  )}
+
+                  {activeTab === "Image" && (
+                    <div className="section p-4 border rounded">
+                      <h4 className="mb-4">Product Image</h4>
+                      <Row>
+                        <Col md={12}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Upload Image</Form.Label>
+                            {product.selectedImage && !newImage && (
+                              <div className="mb-2">
+                                <img
+                                  src={product.selectedImage}
+                                  alt="product"
+                                  className="img-thumbnail"
+                                  style={{
+                                    width: "150px",
+                                    height: "150px",
+                                    objectFit: "cover",
+                                  }}
+                                />
                               </div>
-                            </Card>
-                          ))}
-                        </div>
-                        <Button
-                          type="submit"
-                          className="btn btn-success w-sm mt-3 "
-                          disabled={loading}
-                        >
-                          {loading ? <Spinner size="sm" /> : "Add Product"}
-                        </Button>
-                      </div>
-                    )}
-                  </Form>
-                </Card>
+                            )}
+                            <Form.Control
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageChange}
+                              required={!isEditMode}
+                            />
+                            {preview && (
+                              <img
+                                src={preview}
+                                alt="Preview"
+                                className="preview-img mt-3"
+                              />
+                            )}
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                      <Button
+                        variant="primary"
+                        type="submit"
+                        className="mt-3"
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <Spinner size="sm" />
+                        ) : isEditMode ? (
+                          "Update Product"
+                        ) : (
+                          "Save Product"
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </Form>
+                <ToastContainer position="top-right" autoClose={3000} />
               </Col>
             </Row>
           </Container>
@@ -611,4 +476,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default ProductForm;

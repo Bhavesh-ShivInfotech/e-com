@@ -142,6 +142,24 @@ export const fetchProducts = async () => {
   }
 };
 
+export const fetchProductsById = async (productId) => {
+  try {
+    const response = await API.post(LIST_OF_PRODUCT);
+    const products = response.data?.items || [];
+    const productData = products.find((product) => product.id === productId);
+    if (productData) {
+      return productData;
+    } else {
+      throw new Error("Product not found");
+    }
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message || "Error fetching product details"
+    );
+    throw error;
+  }
+};
+
 export const deleteProduct = async (productId) => {
   return deleteData(`${DELETE_PRODUCT}/${productId}`, {
     is_archived: true,
@@ -177,7 +195,7 @@ export const editImage = async (productId, formData) => {
       `${CHANGE_IMAGE}/${productId}`,
       formData
     );
-    return response.data;
+    return response?.data;
   } catch (error) {
     toast.error(error.response?.data);
     return error;

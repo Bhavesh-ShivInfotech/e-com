@@ -111,7 +111,7 @@ const Product = () => {
         <div className="d-flex gap-2">
           <button
             className="btn btn-sm btn-success edit-item-btn"
-            onClick={() => navigate(`/editProduct/${row.id}`)}
+            onClick={() => navigate(`/edit-product/${row.id}`)}
           >
             Edit
           </button>
@@ -153,7 +153,7 @@ const Product = () => {
                               <Button
                                 color="success"
                                 className="add-btn me-1"
-                                onClick={() => navigate("/addproduct")}
+                                onClick={() => navigate("/add-product")}
                                 id="create-btn"
                               >
                                 <i className="ri-add-line align-bottom me-1"></i>{" "}
