@@ -42,6 +42,7 @@ const Login = (props) => {
   const getValidationMessage = (fieldName, value, rules) => {
     return validator.current.message(fieldName, value, rules);
   };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
