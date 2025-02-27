@@ -16,10 +16,7 @@ const AppRoutes = () => {
         element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />}
       />
       <Route path="/login" element={<Login />} />
-      <Route
-        path="/dashboard"
-        element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
-      />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route
         path="/category"
         element={isAuthenticated ? <Category /> : <Navigate to="/login" />}
