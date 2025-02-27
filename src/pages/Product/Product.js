@@ -93,7 +93,7 @@ const Product = () => {
   };
 
   const columns = [
-    { key: "id", title: "Product ID" },
+    { key: "product_id", title: "Product ID" },
     { key: "name", title: "Name" },
     { key: "description", title: "Description" },
     { key: "price", title: "Price" },
@@ -111,7 +111,7 @@ const Product = () => {
         <div className="d-flex gap-2">
           <button
             className="btn btn-sm btn-success edit-item-btn"
-            onClick={() => navigate(`/edit-product/${row.id}`)}
+            onClick={() => navigate(`/edit-product/${row.product_id}`)}
           >
             Edit
           </button>
@@ -120,12 +120,6 @@ const Product = () => {
             onClick={() => handleDeleteClick(row)}
           >
             Remove
-          </button>
-          <button
-            className="btn btn-sm btn-secondary remove-item-btn"
-            onClick={() => navigate(`/viewProduct/${row.id}`)}
-          >
-            View
           </button>
         </div>
       ),

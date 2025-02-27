@@ -11,6 +11,7 @@ import {
   ADD_PRODUCT,
   EDIT_PRODUCT,
   CHANGE_IMAGE,
+  VIEW_PRODUCT,
 } from "./apiendpoints";
 import { CallSharp, Category } from "@mui/icons-material";
 // import { config } from "webpack";
@@ -142,24 +143,6 @@ export const fetchProducts = async () => {
   }
 };
 
-export const fetchProductsById = async (productId) => {
-  try {
-    const response = await API.post(LIST_OF_PRODUCT);
-    const products = response.data?.items || [];
-    const productData = products.find((product) => product.id === productId);
-    if (productData) {
-      return productData;
-    } else {
-      throw new Error("Product not found");
-    }
-  } catch (error) {
-    toast.error(
-      error.response?.data?.message || "Error fetching product details"
-    );
-    throw error;
-  }
-};
-
 export const deleteProduct = async (productId) => {
   return deleteData(`${DELETE_PRODUCT}/${productId}`, {
     is_archived: true,
@@ -176,6 +159,16 @@ export const addProduct = async (formData) => {
   }
 };
 
+export const viewProduct = async (productId) => {
+  try {
+    const response = await API.get(`${VIEW_PRODUCT}/${productId}`);
+    return response?.data;
+  } catch (error) {
+    toast.error(error.response?.data || "Error fetching products");
+    throw error;
+  }
+};
+
 export const editProduct = async (productId, formData) => {
   try {
     const response = await multipartAPI.put(
@@ -189,12 +182,9 @@ export const editProduct = async (productId, formData) => {
   }
 };
 
-export const editImage = async (productId, formData) => {
+export const editImage = async (formData) => {
   try {
-    const response = await multipartAPI.post(
-      `${CHANGE_IMAGE}/${productId}`,
-      formData
-    );
+    const response = await multipartAPI.post(CHANGE_IMAGE, formData);
     return response?.data;
   } catch (error) {
     toast.error(error.response?.data);
