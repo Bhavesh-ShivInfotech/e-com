@@ -22,6 +22,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./Product.css";
 import "../../index.css";
 
+import { PRODUCT_CONSTANTS } from "./productConstants";
+const MESSSAGE = "Are you Sure You want to Remove this Record?";
 const Product = () => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,6 +33,11 @@ const Product = () => {
   const [productToDelete, setProductToDelete] = useState(null);
   const [modal_delete, setmodal_delete] = useState(false);
   const navigate = useNavigate();
+
+  const handleImageError = (event, defaultImageSrc) => {
+    event.target.onerror = null;
+    event.target.src = defaultImageSrc;
+  };
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -101,7 +108,12 @@ const Product = () => {
       key: "image",
       title: "Image",
       render: (image) => (
-        <img src={image} alt="product" className="img-thumbnail w-75 h-75" />
+        <img
+          src={image}
+          alt="product"
+          className="img-thumbnail w-75 h-75"
+          onError={(e) => handleImageError(e, PRODUCT_CONSTANTS.DEFAULT_IMAGE)}
+        />
       ),
     },
     {
@@ -199,7 +211,7 @@ const Product = () => {
         <CommonDeleteModal
           isOpen={modal_delete}
           toggle={() => setmodal_delete(!modal_delete)}
-          message="Are you Sure You want to Remove this Record?"
+          message={MESSSAGE}
           confirmDelete={confirmDelete}
         />
       </Layout>

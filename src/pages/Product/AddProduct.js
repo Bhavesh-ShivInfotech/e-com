@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link, useParams } from "react-router-dom";
 import {
   Col,
@@ -27,20 +27,41 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./Product.css";
 import SimpleReactValidator from "simple-react-validator";
 
+const PRODUCT_MODULE = {
+  TABS: {
+    GENERAL: {
+      EVENT_KEY: "general",
+      TITLE: "General Information",
+    },
+    DATA: {
+      EVENT_KEY: "data",
+      TITLE: "Product Data",
+    },
+    IMAGE: {
+      EVENT_KEY: "image",
+      TITLE: "Product Image",
+    },
+  },
+  ACTIONS: {
+    EDIT: "Edit Product",
+    ADD: "Add Product",
+  },
+};
 const AddProduct = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("general");
+  const [activeTab, setActiveTab] = useState(
+    PRODUCT_MODULE.TABS.GENERAL.EVENT_KEY
+  );
   const [categories, setCategories] = useState([]);
   const { id } = useParams();
   const isEditMode = !!id;
   const [imageLoading, setImageLoading] = useState(false);
   const [product, setProduct] = useState({
     is_prescription: true,
-    vendor_id: 2,
     name: "",
     description: "",
-    category_id: undefined,
+    category_id: 0,
     price: "",
     quantity: "",
     metaTagTitle: "",
@@ -66,6 +87,28 @@ const AddProduct = () => {
     return validator.current.message(fieldName, value, rules);
   };
 
+  const appendFormData = (product, newImage, formData) => {
+    formData.append("is_prescription", product.is_prescription);
+    formData.append("name", product.name);
+    formData.append("description", product.description);
+    formData.append("category_id", Number(product.category_id));
+    formData.append("price", product.price);
+    formData.append("quantity", product.quantity);
+    formData.append("metaTagTitle", product.metaTagTitle);
+    formData.append("metaTagDescription", product.metaTagDescription);
+    formData.append("metaTagKeywords", product.metaTagKeywords);
+    formData.append("composition", product.composition);
+    formData.append("presentation", product.presentation);
+    formData.append("storage", product.storage);
+    formData.append("indication", product.indication);
+    formData.append("dose", product.dose);
+    if (newImage) {
+      formData.append("selectedImage", newImage);
+    } else {
+      formData.append("SelectedImage", product.selectedImage);
+    }
+  };
+
   useEffect(() => {
     if (isEditMode) {
       const fetchProductData = async () => {
@@ -75,13 +118,9 @@ const AddProduct = () => {
             const productData = response.data[0];
             setProduct({
               is_prescription: true,
-              vendor_id: productData.vendor_id,
               name: productData.name,
               description: productData.description,
-              category_id:
-                productData.category_id === null
-                  ? undefined
-                  : Number(productData.category_id),
+              category_id: Number(productData.category_id),
               price: productData.price,
               quantity: productData.quantity,
               metaTagTitle: productData.metaTagTitle,
@@ -104,20 +143,19 @@ const AddProduct = () => {
               ]);
             }
           } else {
-            toast.error("Failed to fetch product data.");
+            toast.error(response.message);
           }
         } catch (error) {
-          toast.error("Error fetching product data.");
+          toast.error(error.response?.data?.message || error.message);
         }
       };
       fetchProductData();
     } else {
       setProduct({
         is_prescription: true,
-        vendor_id: 2,
         name: "",
         description: "",
-        category_id: undefined,
+        category_id: 0,
         price: "",
         quantity: "",
         metaTagTitle: "",
@@ -132,20 +170,20 @@ const AddProduct = () => {
       });
     }
   }, [id, isEditMode]);
-  const loadCategories = useCallback(async () => {
-    try {
-      const response = await fetchCategories();
-      setCategories(response.data || []);
-    } catch (err) {
-      console.error("Error fetching categories:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await fetchCategories();
+        setCategories(response.data || []);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
     loadCategories();
-  }, [loadCategories]);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -153,6 +191,12 @@ const AddProduct = () => {
     validator.current.showMessageFor(name);
   };
 
+  const updateSelectedImage = (acceptedFiles) => {
+    setProduct((prevProduct) => ({
+      ...prevProduct,
+      selectedImage: acceptedFiles[0],
+    }));
+  };
   const handleAcceptedFiles = (acceptedFiles) => {
     const updatedFiles = acceptedFiles.map((file) =>
       Object.assign(file, {
@@ -160,8 +204,8 @@ const AddProduct = () => {
         formattedSize: formatBytes(file.size),
       })
     );
-    setSelectedFiles([...selectedFiles, ...updatedFiles]);
-    setProduct({ ...product, selectedImage: acceptedFiles[0] });
+    setSelectedFiles((prevFiles) => [...prevFiles, ...updatedFiles]);
+    updateSelectedImage(acceptedFiles);
   };
 
   const formatBytes = (bytes, decimals = 2) => {
@@ -182,26 +226,7 @@ const AddProduct = () => {
     setLoading(true);
 
     const formData = new FormData();
-    formData.append("is_prescription", product.is_prescription);
-    formData.append("vendor_id", product.vendor_id);
-    formData.append("name", product.name);
-    formData.append("description", product.description);
-    formData.append("category_id", Number(product.category_id));
-    formData.append("price", product.price);
-    formData.append("quantity", product.quantity);
-    formData.append("metaTagTitle", product.metaTagTitle);
-    formData.append("metaTagDescription", product.metaTagDescription);
-    formData.append("metaTagKeywords", product.metaTagKeywords);
-    formData.append("composition", product.composition);
-    formData.append("presentation", product.presentation);
-    formData.append("storage", product.storage);
-    formData.append("indication", product.indication);
-    formData.append("dose", product.dose);
-    if (newImage) {
-      formData.append("selectedImage", newImage);
-    } else {
-      formData.append("SelectedImage", product.selectedImage);
-    }
+    appendFormData(product, newImage, formData);
 
     try {
       let response;
@@ -250,7 +275,9 @@ const AddProduct = () => {
             <Row className="align-items-center addproduct-title">
               <Col>
                 <h2 className="mb-0">
-                  {isEditMode ? "Edit Product" : "Add Product"}
+                  {isEditMode
+                    ? PRODUCT_MODULE.ACTIONS.EDIT
+                    : PRODUCT_MODULE.ACTIONS.ADD}
                 </h2>
               </Col>
               <Col className="text-end">
@@ -269,13 +296,22 @@ const AddProduct = () => {
                       onSelect={(k) => setActiveTab(k)}
                       className="nav-tabs-custom rounded card-header-tabs border-bottom-0"
                     >
-                      <Tab eventKey="general" title="General Information" />
-                      <Tab eventKey="data" title="Product Data" />
-                      <Tab eventKey="image" title="Product Image" />
+                      <Tab
+                        eventKey={PRODUCT_MODULE.TABS.GENERAL.EVENT_KEY}
+                        title={PRODUCT_MODULE.TABS.GENERAL.TITLE}
+                      />
+                      <Tab
+                        eventKey={PRODUCT_MODULE.TABS.DATA.EVENT_KEY}
+                        title={PRODUCT_MODULE.TABS.DATA.TITLE}
+                      />
+                      <Tab
+                        eventKey={PRODUCT_MODULE.TABS.IMAGE.EVENT_KEY}
+                        title={PRODUCT_MODULE.TABS.IMAGE.TITLE}
+                      />
                     </Tabs>
                   </Card.Header>
                   <Form onSubmit={handleSubmit} encType="multipart/form-data">
-                    {activeTab === "general" && (
+                    {activeTab === PRODUCT_MODULE.TABS.GENERAL.EVENT_KEY && (
                       <div className="section p-4 border rounded">
                         <Row>
                           <Col md={6}>
@@ -468,7 +504,7 @@ const AddProduct = () => {
                       </div>
                     )}
 
-                    {activeTab === "data" && (
+                    {activeTab === PRODUCT_MODULE.TABS.DATA.EVENT_KEY && (
                       <div className="section p-4 border rounded">
                         <Row>
                           <Col md={6}>
@@ -603,7 +639,7 @@ const AddProduct = () => {
                       </div>
                     )}
 
-                    {activeTab === "image" && (
+                    {activeTab === PRODUCT_MODULE.TABS.IMAGE.EVENT_KEY && (
                       <div className="section p-4 border rounded">
                         <h5 className="fs-15 mb-1">Product Gallery</h5>
                         <p className="text-muted">

@@ -134,13 +134,8 @@ export const editCategory = async (categoryId, formData) => {
 };
 
 export const fetchProducts = async () => {
-  try {
-    const response = await API.post(LIST_OF_PRODUCT);
-    return response?.data;
-  } catch (error) {
-    toast.error(error.response?.data || "Error fetching products");
-    throw error;
-  }
+  const response = await API.post(LIST_OF_PRODUCT);
+  return response?.data;
 };
 
 export const deleteProduct = async (productId) => {
