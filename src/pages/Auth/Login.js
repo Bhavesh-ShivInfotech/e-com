@@ -28,24 +28,50 @@ const Login = (props) => {
   const [userLogin, setUserLogin] = useState({ email_id: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-  const validator = useRef(new SimpleReactValidator());
+  const validator = useRef(
+    new SimpleReactValidator({
+      messages: {
+        required: "Field is required.",
+        email: "Enter a valid Email address.",
+        password: "Password is required",
+      },
+    })
+  );
 
   useEffect(() => {
-    document.title = "ShivInfotech SignIn | React Admin & Dashboard Template";
+    document.title = "Sign In";
   }, []);
 
   const handleChange = (e) => {
-    setUserLogin({ ...userLogin, [e.target.name]: e.target.value });
-  };
+    const { name, value } = e.target;
 
-  const getValidationMessage = (fieldName, value, rules) => {
-    return validator.current.message(fieldName, value, rules);
+    if (value.includes(" ")) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: "Spaces are not allowed in this field.",
+      }));
+      return;
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "",
+    }));
+
+    setUserLogin({ ...userLogin, [name]: value });
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    if (errors.email_id || errors.password) {
+      toast.error("Please fix the errors before submitting.");
+      setLoading(false);
+      return;
+    }
 
     if (validator.current.allValid()) {
       try {
@@ -97,13 +123,13 @@ const Login = (props) => {
                 <Card className="mt-4">
                   <CardBody className="p-4">
                     <div className="text-center mt-2">
-                      <h2 className="text-primary">Welcome Back!</h2>
+                      <h2 className="text-primary title">Welcome Back!</h2>
                     </div>
                     <div className="p-2 mt-4">
                       <Form onSubmit={handleLogin}>
                         <div className="mb-4">
                           <Label htmlFor="email_id" className="form-label">
-                            Email
+                            Email <span className="text-danger">*</span>
                           </Label>
                           <Input
                             name="email_id"
@@ -112,11 +138,25 @@ const Login = (props) => {
                             type="email"
                             value={userLogin.email_id}
                             onChange={handleChange}
+                            style={{ fontFamily: "Poppins, sans-serif" }}
                           />
-                          {getValidationMessage(
+                          {validator.current.message(
                             "email_id",
                             userLogin.email_id,
                             "required|email"
+                          ) && (
+                            <div style={{ color: "red", fontSize: "0.875em" }}>
+                              {validator.current.message(
+                                "email_id",
+                                userLogin.email_id,
+                                "required|email"
+                              )}
+                            </div>
+                          )}
+                          {errors.email_id && (
+                            <div style={{ color: "red", fontSize: "0.875em" }}>
+                              {errors.email_id}
+                            </div>
                           )}
                         </div>
 
@@ -130,7 +170,7 @@ const Login = (props) => {
                             className="form-label"
                             htmlFor="password-input"
                           >
-                            Password
+                            Password <span className="text-danger">*</span>
                           </Label>
                           <div className="position-relative auth-pass-inputgroup mb-3">
                             <Input
@@ -141,11 +181,29 @@ const Login = (props) => {
                               placeholder="Enter Password"
                               onChange={handleChange}
                               autoComplete="new-password"
+                              style={{ fontFamily: "Poppins, sans-serif" }}
                             />
-                            {getValidationMessage(
+                            {validator.current.message(
                               "password",
                               userLogin.password,
-                              "required|min:6"
+                              "required"
+                            ) && (
+                              <div
+                                style={{ color: "red", fontSize: "0.875em" }}
+                              >
+                                {validator.current.message(
+                                  "password",
+                                  userLogin.password,
+                                  "required"
+                                )}
+                              </div>
+                            )}
+                            {errors.password && (
+                              <div
+                                style={{ color: "red", fontSize: "0.875em" }}
+                              >
+                                {errors.password}
+                              </div>
                             )}
 
                             <button

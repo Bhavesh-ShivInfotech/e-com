@@ -26,6 +26,7 @@ import API, {
 } from "../../services/api";
 import { toast, ToastContainer } from "react-toastify";
 import Pagination from "../../Components/Common/Pagination";
+import RowsPerPage from "../../Components/Common/RowsPerPage";
 import SimpleReactValidator from "simple-react-validator";
 import BaseTable from "../Table/BaseTable";
 import { fetchCategories } from "../../services/api";
@@ -37,6 +38,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Category.css";
 import "../../index.css";
+import ImageError from "../../../src/assets/images/auth-one-bg.jpg";
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
@@ -57,9 +59,20 @@ const Category = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
 
+  const handleImageError = (event, defaultImageSrc) => {
+    event.target.onerror = null;
+    event.target.src = defaultImageSrc;
+  };
+
   const [validator] = useState(
     new SimpleReactValidator({
       className: "error-message",
+      messages: {
+        required: "Field is required.",
+        name: "Name is required.",
+        description: "Description is required.",
+        image: "Image is required.",
+      },
     })
   );
 
@@ -69,6 +82,7 @@ const Category = () => {
       setIsEditMode(false);
       setCategory({ id: "", name: "", description: "", image: null });
       setPreview(null);
+      validator.hideMessages();
     }
   };
 
@@ -207,7 +221,13 @@ const Category = () => {
       key: "image",
       title: "Image",
       render: (image) => (
-        <img src={image} alt="Category" className="img-thumbnail w-75 h-75" />
+        <img
+          src={image}
+          alt="product"
+          className="img-thumbnail"
+          onError={(e) => handleImageError(e, ImageError)}
+          style={{ width: "100px", height: "60px" }}
+        />
       ),
     },
     {
@@ -243,23 +263,35 @@ const Category = () => {
                 <Col xl={12} md={12} lg={12}>
                   <Card>
                     <CardHeader>
-                      <h5 className="card-title mb-0 fs-3">Category</h5>
+                      <Row className="g-4 ">
+                        <Col className="col-sm-auto">
+                          <div>
+                            <h5 className="card-title mb-0 fs-3">Category</h5>
+                          </div>
+                        </Col>
+                        <Col className="d-flex justify-content-sm-end">
+                          <div>
+                            <Button
+                              color="success"
+                              className="add-btn me-1"
+                              onClick={tog_list}
+                              id="create-btn"
+                            >
+                              <i className="ri-add-line align-bottom me-1"></i>{" "}
+                              Add
+                            </Button>
+                          </div>
+                        </Col>
+                      </Row>
                     </CardHeader>
                     <CardBody>
                       <div className="listjs-table" id="customerList">
                         <Row className="g-4 mb-3">
                           <Col className="col-sm-auto">
-                            <div>
-                              <Button
-                                color="success"
-                                className="add-btn me-1"
-                                onClick={tog_list}
-                                id="create-btn"
-                              >
-                                <i className="ri-add-line align-bottom me-1"></i>{" "}
-                                Add
-                              </Button>
-                            </div>
+                            <RowsPerPage
+                              rowsPerPage={rowsPerPage}
+                              handleRowsPerPageChange={handleRowsPerPageChange}
+                            />
                           </Col>
                           <Col className="col-sm">
                             <div className="d-flex justify-content-sm-end">
@@ -284,15 +316,13 @@ const Category = () => {
                           data={currentRows}
                           isLoading={loading}
                         />
-
-                        <Pagination
-                          totalPages={totalPages}
-                          currentPage={currentPage}
-                          setCurrentPage={setCurrentPage}
-                          rowsPerPage={rowsPerPage}
-                          handleRowsPerPageChange={handleRowsPerPageChange}
-                        />
-                        <ToastContainer position="top-right" autoClose={3000} />
+                        <div className="d-flex justify-content-sm-end">
+                          <Pagination
+                            totalPages={totalPages}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                          />
+                        </div>
                       </div>
                     </CardBody>
                   </Card>
@@ -332,7 +362,7 @@ const Category = () => {
                 htmlFor="categoryName"
                 className="form-label text-start w-100"
               >
-                Category Name
+                Category Name <span className="text-danger">*</span>
               </Label>
               <Input
                 type="text"
@@ -342,8 +372,9 @@ const Category = () => {
                 name="name"
                 value={category.name}
                 onChange={handleChange}
+                onBlur={() => validator.showMessageFor("name")}
               />
-              {validator.message("name", category.name, "required")}
+              {validator.message("name", category.name, "required|name")}
             </div>
 
             <div className="mb-3">
@@ -351,7 +382,7 @@ const Category = () => {
                 htmlFor="categoryDescription"
                 className="form-label text-start w-100"
               >
-                Description
+                Description <span className="text-danger">*</span>
               </Label>
               <Input
                 type="textarea"
@@ -361,11 +392,12 @@ const Category = () => {
                 name="description"
                 value={category.description}
                 onChange={handleChange}
+                onBlur={() => validator.showMessageFor("description")}
               />
               {validator.message(
                 "description",
                 category.description,
-                "required"
+                "required|description"
               )}
             </div>
 
@@ -374,7 +406,7 @@ const Category = () => {
                 htmlFor="categoryImage"
                 className="form-label text-start w-100"
               >
-                Category Image
+                Category Image <span className="text-danger">*</span>
               </Label>
               <Input
                 type="file"
@@ -383,7 +415,7 @@ const Category = () => {
                 accept="image/*"
                 onChange={handleImageChange}
               />
-              {validator.message("image", category.image, "required")}
+              {validator.message("image", category.image, "required|image")}
               {preview && (
                 <div className="img-preview">
                   <img src={preview} alt="Preview" className="preview-img" />

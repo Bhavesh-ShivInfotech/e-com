@@ -60,15 +60,25 @@ const ListOfOrder = ({ data }) => {
     }
   };
 
+  const formatCurrency = (value) => {
+    return `₹${value}`;
+  };
   const columns = [
     { key: "order_id", title: "Order ID" },
     { key: "userName", title: "First Name" },
-    { key: "lastName", title: "Last Name" },
+    {
+      key: "lastName",
+      title: "Last Name",
+    },
     { key: "email", title: "Email ID" },
-    { key: "total_amount", title: "Total Amount" },
+    {
+      key: "total_amount",
+      title: "Total Amount",
+      render: (value) => formatCurrency(value),
+    },
     { key: "status", title: "Status" },
     { key: "discount", title: "Discount" },
-    { key: "tax", title: "Tax" },
+    { key: "tax", title: "Tax", render: (value) => formatCurrency(value) },
   ];
 
   return (
@@ -88,13 +98,13 @@ const ListOfOrder = ({ data }) => {
                     onSelectAll={handleSelectAll}
                     getStatusClass={getStatusClass}
                   />
-                  <Pagination
-                    totalPages={totalPages}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
-                    rowsPerPage={rowsPerPage}
-                    handleRowsPerPageChange={handleRowsPerPageChange}
-                  />
+                  <div className="d-flex justify-content-sm-end">
+                    <Pagination
+                      totalPages={totalPages}
+                      currentPage={currentPage}
+                      setCurrentPage={setCurrentPage}
+                    />
+                  </div>
                 </CardBody>
               </Card>
             </Col>

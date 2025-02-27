@@ -69,7 +69,7 @@ const BaseTable = ({
                       formatDate(row.created_at)
                     ) : (
                       row[col.key || col.toLowerCase().replace(/\s/g, "_")] ||
-                      "N/A"
+                      "--"
                     )}
                   </td>
                 ))}
