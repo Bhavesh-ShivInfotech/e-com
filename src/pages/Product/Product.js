@@ -21,8 +21,8 @@ import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Product.css";
 import "../../index.css";
-
-import { PRODUCT_CONSTANTS } from "./productConstants";
+import ImageError from "../../../src/assets/images/auth-one-bg.jpg";
+// import { PRODUCT_CONSTANTS } from "./productConstants";
 const MESSSAGE = "Are you Sure You want to Remove this Record?";
 const Product = () => {
   const [products, setProducts] = useState([]);
@@ -111,8 +111,9 @@ const Product = () => {
         <img
           src={image}
           alt="product"
-          className="img-thumbnail w-75 h-75"
-          onError={(e) => handleImageError(e, PRODUCT_CONSTANTS.DEFAULT_IMAGE)}
+          className="img-thumbnail"
+          onError={(e) => handleImageError(e, ImageError)}
+          style={{ width: "100px", height: "60px" }}
         />
       ),
     },
