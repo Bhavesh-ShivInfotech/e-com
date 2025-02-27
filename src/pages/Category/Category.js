@@ -58,6 +58,12 @@ const Category = () => {
   const [preview, setPreview] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
+
+  useEffect(() => {
+    document.title = "Category";
+  }, []);
 
   const handleImageError = (event, defaultImageSrc) => {
     event.target.onerror = null;
@@ -126,6 +132,11 @@ const Category = () => {
       setPreview(URL.createObjectURL(file));
       validator.showMessageFor("image");
     }
+  };
+
+  const handleCancelImage = () => {
+    setCategory({ ...category, image: null });
+    setPreview(null);
   };
 
   const handleSubmit = async (e) => {
@@ -201,22 +212,62 @@ const Category = () => {
     }
   };
 
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
   const filteredCategories = categories.filter(({ name, description }) =>
     [name, description].some((field) =>
       field.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
-  const currentRows = filteredCategories.slice(
+  const sortedCategories = [...filteredCategories].sort((a, b) => {
+    if (sortColumn) {
+      const aValue = a[sortColumn];
+      const bValue = b[sortColumn];
+
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return sortDirection === "asc"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      } else {
+        return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+      }
+    }
+    return 0;
+  });
+
+  const totalPages = Math.ceil(sortedCategories.length / rowsPerPage);
+  const currentRows = sortedCategories.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
 
   const columns = [
-    { key: "id", title: "ID" },
-    { key: "name", title: "Name" },
-    { key: "description", title: "Description" },
+    {
+      key: "id",
+      title: "ID",
+      sortable: true,
+      onClick: () => handleSort("name"),
+    },
+    {
+      key: "name",
+      title: "Name",
+      sortable: true,
+      onClick: () => handleSort("name"),
+    },
+    {
+      key: "description",
+      title: "Description",
+      sortable: true,
+      onClick: () => handleSort("description"),
+    },
     {
       key: "image",
       title: "Image",
@@ -315,6 +366,8 @@ const Category = () => {
                           columns={columns}
                           data={currentRows}
                           isLoading={loading}
+                          sortColumn={sortColumn}
+                          sortDirection={sortDirection}
                         />
                         <div className="d-flex justify-content-sm-end">
                           <Pagination
@@ -374,7 +427,7 @@ const Category = () => {
                 onChange={handleChange}
                 onBlur={() => validator.showMessageFor("name")}
               />
-              {validator.message("name", category.name, "required|name")}
+              {validator.message("name", category.name, "required")}
             </div>
 
             <div className="mb-3">
@@ -397,7 +450,7 @@ const Category = () => {
               {validator.message(
                 "description",
                 category.description,
-                "required|description"
+                "required"
               )}
             </div>
 
@@ -415,10 +468,20 @@ const Category = () => {
                 accept="image/*"
                 onChange={handleImageChange}
               />
-              {validator.message("image", category.image, "required|image")}
+              {validator.message("image", category.image, "required")}
+
               {preview && (
                 <div className="img-preview">
                   <img src={preview} alt="Preview" className="preview-img" />
+                  <div style={{ marginTop: "5px" }}>
+                    <Button
+                      color="danger"
+                      size="sm"
+                      onClick={handleCancelImage}
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

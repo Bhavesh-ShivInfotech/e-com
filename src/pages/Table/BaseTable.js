@@ -14,6 +14,8 @@ const BaseTable = ({
   getStatusClass,
   isLoading,
   error,
+  sortColumn,
+  sortDirection,
 }) => {
   const formatDate = (date) => {
     if (!date) return "N/A";
@@ -23,6 +25,12 @@ const BaseTable = ({
   const safeColumns = columns || [];
   const safeData = data || [];
 
+  const getSortIndicator = (columnKey, direction) => {
+    if (sortColumn === columnKey && sortDirection === direction) {
+      return direction === "asc" ? "▲" : "▼";
+    }
+    return direction === "asc" ? "△" : "▽";
+  };
   return (
     <div className="table-responsive ">
       <Table
@@ -32,8 +40,39 @@ const BaseTable = ({
         <thead className="table-light">
           <tr>
             {safeColumns.map((col) => (
-              <th key={col.key || col} scope="col">
+              <th
+                key={col.key || col}
+                scope="col"
+                onClick={col.onClick}
+                style={{
+                  cursor: col.sortable ? "pointer" : "default",
+                  position: "relative",
+                }}
+              >
                 {col.title || col}
+                {col.sortable && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      right: "5px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                    }}
+                  >
+                    <span
+                      onClick={() => col.onClick(col.key, "asc")}
+                      style={{ cursor: "pointer", marginRight: "3px" }}
+                    >
+                      {getSortIndicator(col.key, "asc")}
+                    </span>
+                    <span
+                      onClick={() => col.onClick(col.key, "desc")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      {getSortIndicator(col.key, "desc")}
+                    </span>
+                  </span>
+                )}
               </th>
             ))}
           </tr>
@@ -103,6 +142,8 @@ BaseTable.propTypes = {
   getStatusClass: PropTypes.func,
   isLoading: PropTypes.bool,
   error: PropTypes.string,
+  sortColumn: PropTypes.string,
+  sortDirection: PropTypes.string,
 };
 
 BaseTable.defaultProps = {
@@ -110,6 +151,8 @@ BaseTable.defaultProps = {
   error: null,
   selectedCustomers: [],
   selectedRows: [],
+  sortColumn: null,
+  sortDirection: "asc",
 };
 
 export default BaseTable;

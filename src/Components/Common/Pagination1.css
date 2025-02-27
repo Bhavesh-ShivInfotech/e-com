@@ -1,0 +1,10 @@
+.disabled-link {
+  color: #6c757d;
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  cursor: not-allowed;
+}
+
+.page-item.disabled {
+  cursor: not-allowed;
+}
