@@ -21,6 +21,7 @@ import { ResponseStatusEnum } from "../../Components/constants/httpStatusCodes";
 import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Product.css";
+import { PRODUCT_COLUMNS } from "./productConstants";
 import "../../index.css";
 import ImageError from "../../../src/assets/images/auth-one-bg.jpg";
 const MESSSAGE = "Are you Sure You want to Remove this Record?";
@@ -134,60 +135,7 @@ const Product = () => {
     }
   };
 
-  const columns = [
-    {
-      key: "product_id",
-      title: "Product ID",
-      sortable: true,
-      onClick: () => handleSort("product_id"),
-    },
-    {
-      key: "name",
-      title: "Name",
-      sortable: true,
-      onClick: () => handleSort("name"),
-    },
-    {
-      key: "description",
-      title: "Description",
-      sortable: true,
-      onClick: () => handleSort("description"),
-    },
-    { key: "price", title: "Price" },
-    {
-      key: "image",
-      title: "Image",
-      render: (image) => (
-        <img
-          src={image}
-          alt="product"
-          className="img-thumbnail"
-          onError={(e) => handleImageError(e, ImageError)}
-          style={{ width: "100px", height: "60px" }}
-        />
-      ),
-    },
-    {
-      key: "actions",
-      title: "Action",
-      render: (_, row) => (
-        <div className="d-flex gap-2">
-          <button
-            className="btn btn-sm btn-success edit-item-btn"
-            onClick={() => navigate(`/edit-product/${row.product_id}`)}
-          >
-            Edit
-          </button>
-          <button
-            className="btn btn-sm btn-danger remove-item-btn"
-            onClick={() => handleDeleteClick(row)}
-          >
-            Remove
-          </button>
-        </div>
-      ),
-    },
-  ];
+  const columns = PRODUCT_COLUMNS(handleSort, navigate, handleDeleteClick);
   return (
     <React.Fragment>
       <Layout>

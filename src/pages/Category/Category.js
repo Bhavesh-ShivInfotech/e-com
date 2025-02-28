@@ -38,8 +38,9 @@ import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Category.css";
 import "../../index.css";
-import ImageError from "../../../src/assets/images/auth-one-bg.jpg";
+import { CATEGORY_COLUMNS } from "./CategoryConstant";
 const MESSSAGE = "Are you Sure You want to Remove this Record?";
+document.title = "Category";
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
@@ -62,20 +63,19 @@ const Category = () => {
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
 
-  useEffect(() => {
-    document.title = "Category";
-  }, []);
-
   const handleImageError = (event, defaultImageSrc) => {
     event.target.onerror = null;
     event.target.src = defaultImageSrc;
   };
 
+  const requiredMessage = (field) => {
+    return `${field} is required`;
+  };
   const [validator] = useState(
     new SimpleReactValidator({
       className: "error-message",
       messages: {
-        required: "Field is required.",
+        required: requiredMessage("Field"),
         name: "Name is required.",
         description: "Description is required.",
         image: "Image is required.",
@@ -131,7 +131,7 @@ const Category = () => {
     if (file) {
       setCategory({ ...category, image: file });
       setPreview(URL.createObjectURL(file));
-      validator.showMessageFor("image");
+      // validator.showMessageFor("image");
     }
   };
 
@@ -252,59 +252,11 @@ const Category = () => {
   );
   const startRow = (currentPage - 1) * rowsPerPage + 1;
   const endRow = Math.min(currentPage * rowsPerPage, totalRows);
-  const columns = [
-    {
-      key: "id",
-      title: "ID",
-      sortable: true,
-      onClick: () => handleSort("id"),
-    },
-    {
-      key: "name",
-      title: "Name",
-      sortable: true,
-      onClick: () => handleSort("name"),
-    },
-    {
-      key: "description",
-      title: "Description",
-      sortable: true,
-      onClick: () => handleSort("description"),
-    },
-    {
-      key: "image",
-      title: "Image",
-      render: (image) => (
-        <img
-          src={image || ImageError}
-          alt="product"
-          className="img-thumbnail"
-          onError={(e) => handleImageError(e, ImageError)}
-          style={{ width: "100px", height: "60px" }}
-        />
-      ),
-    },
-    {
-      key: "actions",
-      title: "Action",
-      render: (_, row) => (
-        <div className="d-flex gap-2">
-          <button
-            className="btn btn-sm btn-success edit-item-btn"
-            onClick={() => handleEditClick(row)}
-          >
-            Edit
-          </button>
-          <button
-            className="btn btn-sm btn-danger remove-item-btn"
-            onClick={() => handleDeleteClick(row)}
-          >
-            Remove
-          </button>
-        </div>
-      ),
-    },
-  ];
+  const columns = CATEGORY_COLUMNS(
+    handleSort,
+    handleEditClick,
+    handleDeleteClick
+  );
   return (
     <React.Fragment>
       <Layout>

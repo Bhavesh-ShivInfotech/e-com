@@ -23,6 +23,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./login.css";
 import { login } from "./authServices";
 import { jwtDecode } from "jwt-decode";
+const MESSSAGE = "Sign In";
 
 const Login = (props) => {
   const [userLogin, setUserLogin] = useState({ email_id: "", password: "" });
@@ -41,26 +42,26 @@ const Login = (props) => {
   );
 
   useEffect(() => {
-    document.title = "Sign In";
+    document.title = MESSSAGE;
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const hasSpaces = /\s/.test(value);
+    const trimmedValue = value.trim();
 
-    if (value.includes(" ")) {
+    if (hasSpaces) {
       setErrors((prevErrors) => ({
         ...prevErrors,
         [name]: "Spaces are not allowed in this field.",
       }));
       return;
     }
-
     setErrors((prevErrors) => ({
       ...prevErrors,
       [name]: "",
     }));
-
-    setUserLogin({ ...userLogin, [name]: value });
+    setUserLogin({ ...userLogin, [name]: trimmedValue });
   };
 
   const handleLogin = async (e) => {
@@ -68,35 +69,36 @@ const Login = (props) => {
     setLoading(true);
 
     if (errors.email_id || errors.password) {
-      toast.error("Please fix the errors before submitting.");
-      setLoading(false);
       return;
     }
 
     if (validator.current.allValid()) {
-      try {
-        const response = await login(
-          userLogin.email_id,
-          userLogin.password,
-          "Admin"
-        );
-        if (response?.status === ResponseStatusEnum.SUCCESS) {
-          localStorage.setItem("adminToken", response?.data?.token);
-          const decodedToken = jwtDecode(response?.data?.token);
-          const userRole = decodedToken.role;
-          localStorage.setItem("role", userRole);
-          navigate("/dashboard");
-          toast.success(response.message);
-        } else {
-          toast.error(response.message);
-        }
-      } catch (err) {
-        toast.error(err.response?.data?.message || err.message);
-      } finally {
-        setLoading(false);
-      }
-    } else {
       validator.current.showMessages();
+
+      setUserLogin({ ...userLogin });
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const response = await login(
+        userLogin.email_id,
+        userLogin.password,
+        "Admin"
+      );
+      if (response?.status === ResponseStatusEnum.SUCCESS) {
+        localStorage.setItem("adminToken", response?.data?.token);
+        const decodedToken = jwtDecode(response?.data?.token);
+        const userRole = decodedToken.role;
+        localStorage.setItem("role", userRole);
+        navigate("/dashboard");
+        toast.success(response.message);
+      } else {
+        toast.error(response.message);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message);
+    } finally {
       setLoading(false);
     }
   };
@@ -225,7 +227,12 @@ const Login = (props) => {
                             color="success"
                             className="btn btn-success w-100 fs-5 fw-bold"
                             type="submit"
-                            disabled={loading}
+                            disabled={
+                              loading ||
+                              errors.email_id ||
+                              errors.password ||
+                              !validator.current.allValid()
+                            }
                           >
                             {loading ? <Spinner size="sm" /> : "Sign In"}
                           </Button>
