@@ -43,7 +43,6 @@ const Charts = ({ data }) => {
   };
 
   const chartSeries = [
-    { name: "Active Customers", type: "line", data: graphDataMapped },
     {
       name: "Active Customers",
       type: "bar",

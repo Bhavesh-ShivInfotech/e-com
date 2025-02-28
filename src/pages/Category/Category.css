@@ -40,3 +40,8 @@
 .model-footer {
   padding-top: 0.5rem;
 }
+
+.onerror-img {
+  width: 100px;
+  height: 60px;
+}

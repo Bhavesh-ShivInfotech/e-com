@@ -26,6 +26,7 @@ import API, {
 } from "../../services/api";
 import { toast, ToastContainer } from "react-toastify";
 import Pagination from "../../Components/Common/Pagination";
+import RowsPerPage from "../../Components/Common/RowsPerPage";
 import SimpleReactValidator from "simple-react-validator";
 import BaseTable from "../Table/BaseTable";
 import { fetchCategories } from "../../services/api";
@@ -37,6 +38,9 @@ import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Category.css";
 import "../../index.css";
+import { CATEGORY_COLUMNS } from "./CategoryConstant";
+const MESSSAGE = "Are you Sure You want to Remove this Record?";
+document.title = "Category";
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
@@ -56,10 +60,26 @@ const Category = () => {
   const [preview, setPreview] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
 
+  const handleImageError = (event, defaultImageSrc) => {
+    event.target.onerror = null;
+    event.target.src = defaultImageSrc;
+  };
+
+  const requiredMessage = (field) => {
+    return `${field} is required`;
+  };
   const [validator] = useState(
     new SimpleReactValidator({
       className: "error-message",
+      messages: {
+        required: requiredMessage("Field"),
+        name: "Name is required.",
+        description: "Description is required.",
+        image: "Image is required.",
+      },
     })
   );
 
@@ -69,6 +89,7 @@ const Category = () => {
       setIsEditMode(false);
       setCategory({ id: "", name: "", description: "", image: null });
       setPreview(null);
+      validator.hideMessages();
     }
   };
 
@@ -110,8 +131,13 @@ const Category = () => {
     if (file) {
       setCategory({ ...category, image: file });
       setPreview(URL.createObjectURL(file));
-      validator.showMessageFor("image");
+      // validator.showMessageFor("image");
     }
+  };
+
+  const handleCancelImage = () => {
+    setCategory({ ...category, image: null });
+    setPreview(null);
   };
 
   const handleSubmit = async (e) => {
@@ -187,50 +213,50 @@ const Category = () => {
     }
   };
 
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
   const filteredCategories = categories.filter(({ name, description }) =>
     [name, description].some((field) =>
       field.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  const totalPages = Math.ceil(filteredCategories.length / rowsPerPage);
-  const currentRows = filteredCategories.slice(
+  const sortedCategories = [...filteredCategories].sort((a, b) => {
+    if (sortColumn) {
+      const aValue = a[sortColumn];
+      const bValue = b[sortColumn];
+
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return sortDirection === "asc"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      } else {
+        return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+      }
+    }
+    return 0;
+  });
+
+  const totalRows = sortedCategories.length;
+  const totalPages = Math.ceil(sortedCategories.length / rowsPerPage);
+  const currentRows = sortedCategories.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
-
-  const columns = [
-    { key: "id", title: "ID" },
-    { key: "name", title: "Name" },
-    { key: "description", title: "Description" },
-    {
-      key: "image",
-      title: "Image",
-      render: (image) => (
-        <img src={image} alt="Category" className="img-thumbnail w-75 h-75" />
-      ),
-    },
-    {
-      key: "actions",
-      title: "Action",
-      render: (_, row) => (
-        <div className="d-flex gap-2">
-          <button
-            className="btn btn-sm btn-success edit-item-btn"
-            onClick={() => handleEditClick(row)}
-          >
-            Edit
-          </button>
-          <button
-            className="btn btn-sm btn-danger remove-item-btn"
-            onClick={() => handleDeleteClick(row)}
-          >
-            Remove
-          </button>
-        </div>
-      ),
-    },
-  ];
+  const startRow = (currentPage - 1) * rowsPerPage + 1;
+  const endRow = Math.min(currentPage * rowsPerPage, totalRows);
+  const columns = CATEGORY_COLUMNS(
+    handleSort,
+    handleEditClick,
+    handleDeleteClick
+  );
   return (
     <React.Fragment>
       <Layout>
@@ -243,23 +269,35 @@ const Category = () => {
                 <Col xl={12} md={12} lg={12}>
                   <Card>
                     <CardHeader>
-                      <h5 className="card-title mb-0 fs-3">Category</h5>
+                      <Row className="g-4 ">
+                        <Col className="col-sm-auto">
+                          <div>
+                            <h5 className="card-title mb-0 fs-3">Category</h5>
+                          </div>
+                        </Col>
+                        <Col className="d-flex justify-content-sm-end">
+                          <div>
+                            <Button
+                              color="success"
+                              className="add-btn me-1"
+                              onClick={tog_list}
+                              id="create-btn"
+                            >
+                              <i className="ri-add-line align-bottom me-1"></i>{" "}
+                              Add
+                            </Button>
+                          </div>
+                        </Col>
+                      </Row>
                     </CardHeader>
                     <CardBody>
                       <div className="listjs-table" id="customerList">
                         <Row className="g-4 mb-3">
                           <Col className="col-sm-auto">
-                            <div>
-                              <Button
-                                color="success"
-                                className="add-btn me-1"
-                                onClick={tog_list}
-                                id="create-btn"
-                              >
-                                <i className="ri-add-line align-bottom me-1"></i>{" "}
-                                Add
-                              </Button>
-                            </div>
+                            <RowsPerPage
+                              rowsPerPage={rowsPerPage}
+                              handleRowsPerPageChange={handleRowsPerPageChange}
+                            />
                           </Col>
                           <Col className="col-sm">
                             <div className="d-flex justify-content-sm-end">
@@ -283,16 +321,22 @@ const Category = () => {
                           columns={columns}
                           data={currentRows}
                           isLoading={loading}
+                          sortColumn={sortColumn}
+                          sortDirection={sortDirection}
                         />
-
-                        <Pagination
-                          totalPages={totalPages}
-                          currentPage={currentPage}
-                          setCurrentPage={setCurrentPage}
-                          rowsPerPage={rowsPerPage}
-                          handleRowsPerPageChange={handleRowsPerPageChange}
-                        />
-                        <ToastContainer position="top-right" autoClose={3000} />
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div className="text-muted">
+                            Showing {startRow} to {endRow} of {totalRows}{" "}
+                            results
+                          </div>
+                          <div className="d-flex justify-content-sm-end">
+                            <Pagination
+                              totalPages={totalPages}
+                              currentPage={currentPage}
+                              setCurrentPage={setCurrentPage}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </CardBody>
                   </Card>
@@ -332,7 +376,7 @@ const Category = () => {
                 htmlFor="categoryName"
                 className="form-label text-start w-100"
               >
-                Category Name
+                Category Name <span className="text-danger">*</span>
               </Label>
               <Input
                 type="text"
@@ -342,6 +386,7 @@ const Category = () => {
                 name="name"
                 value={category.name}
                 onChange={handleChange}
+                onBlur={() => validator.showMessageFor("name")}
               />
               {validator.message("name", category.name, "required")}
             </div>
@@ -351,7 +396,7 @@ const Category = () => {
                 htmlFor="categoryDescription"
                 className="form-label text-start w-100"
               >
-                Description
+                Description <span className="text-danger">*</span>
               </Label>
               <Input
                 type="textarea"
@@ -361,6 +406,7 @@ const Category = () => {
                 name="description"
                 value={category.description}
                 onChange={handleChange}
+                onBlur={() => validator.showMessageFor("description")}
               />
               {validator.message(
                 "description",
@@ -374,7 +420,7 @@ const Category = () => {
                 htmlFor="categoryImage"
                 className="form-label text-start w-100"
               >
-                Category Image
+                Category Image <span className="text-danger">*</span>
               </Label>
               <Input
                 type="file"
@@ -384,9 +430,19 @@ const Category = () => {
                 onChange={handleImageChange}
               />
               {validator.message("image", category.image, "required")}
+
               {preview && (
                 <div className="img-preview">
                   <img src={preview} alt="Preview" className="preview-img" />
+                  <div style={{ marginTop: "5px" }}>
+                    <Button
+                      color="danger"
+                      size="sm"
+                      onClick={handleCancelImage}
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -396,7 +452,7 @@ const Category = () => {
         <CommonDeleteModal
           isOpen={modal_delete}
           toggle={tog_delete}
-          message="Are you Sure You want to Remove this Record?"
+          message={MESSSAGE}
           confirmDelete={confirmDelete}
         />
       </Layout>
