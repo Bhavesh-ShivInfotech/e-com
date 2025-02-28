@@ -276,7 +276,7 @@ const Category = () => {
       title: "Image",
       render: (image) => (
         <img
-          src={image}
+          src={image || ImageError}
           alt="product"
           className="img-thumbnail"
           onError={(e) => handleImageError(e, ImageError)}
