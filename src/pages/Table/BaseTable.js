@@ -32,6 +32,12 @@ const BaseTable = ({
     }
     return direction === "asc" ? "△" : "▽";
   };
+
+  if (safeData.length === 0) {
+    return (
+      <div className="text-muted text-center">No matching records found.</div>
+    );
+  }
   return (
     <div className="table-responsive ">
       <Table
@@ -79,52 +85,32 @@ const BaseTable = ({
           </tr>
         </thead>
         <tbody>
-          {error ? (
-            <tr>
-              <td
-                colSpan={safeColumns.length}
-                className="text-danger text-center"
-              >
-                {error}
-              </td>
+          {safeData.map((row) => (
+            <tr key={row?.id}>
+              {safeColumns.map((col) => (
+                <td key={col.key || col}>
+                  {col.render ? (
+                    col.render(row[col.key], row)
+                  ) : col.key === "status" ? (
+                    <span
+                      className={
+                        getStatusClass ? getStatusClass(row[col.key]) : ""
+                      }
+                    >
+                      {row[col.key]}
+                    </span>
+                  ) : col === "Date of Birth" ? (
+                    formatDate(row.dob)
+                  ) : col === "Created At" ? (
+                    formatDate(row.created_at)
+                  ) : (
+                    row[col.key || col.toLowerCase().replace(/\s/g, "_")] ||
+                    "--"
+                  )}
+                </td>
+              ))}
             </tr>
-          ) : safeData.length > 0 ? (
-            safeData.map((row) => (
-              <tr key={row?.id}>
-                {safeColumns.map((col) => (
-                  <td key={col.key || col}>
-                    {col.render ? (
-                      col.render(row[col.key], row)
-                    ) : col.key === "status" ? (
-                      <span
-                        className={
-                          getStatusClass ? getStatusClass(row[col.key]) : ""
-                        }
-                      >
-                        {row[col.key]}
-                      </span>
-                    ) : col === "Date of Birth" ? (
-                      formatDate(row.dob)
-                    ) : col === "Created At" ? (
-                      formatDate(row.created_at)
-                    ) : (
-                      row[col.key || col.toLowerCase().replace(/\s/g, "_")] ||
-                      "--"
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan={safeColumns.length}
-                className="text-muted text-center"
-              >
-                No data found.
-              </td>
-            </tr>
-          )}
+          ))}
         </tbody>
       </Table>
     </div>
