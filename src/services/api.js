@@ -6,6 +6,12 @@ import {
   DELETE_CATEGORY,
   ADD_CATEGORY,
   EDIT_CATEGORY,
+  DELETE_PRODUCT,
+  LIST_OF_PRODUCT,
+  ADD_PRODUCT,
+  EDIT_PRODUCT,
+  CHANGE_IMAGE,
+  VIEW_PRODUCT,
 } from "./apiendpoints";
 import { CallSharp, Category } from "@mui/icons-material";
 // import { config } from "webpack";
@@ -127,4 +133,57 @@ export const editCategory = async (categoryId, formData) => {
   }
 };
 
+export const fetchProducts = async () => {
+  const response = await API.post(LIST_OF_PRODUCT);
+  return response?.data;
+};
+
+export const deleteProduct = async (productId) => {
+  return deleteData(`${DELETE_PRODUCT}/${productId}`, {
+    is_archived: true,
+  });
+};
+
+export const addProduct = async (formData) => {
+  try {
+    const response = await multipartAPI.post(ADD_PRODUCT, formData);
+    return response.data;
+  } catch (error) {
+    toast.error(error.response?.data);
+    return error;
+  }
+};
+
+export const viewProduct = async (productId) => {
+  try {
+    const response = await API.get(`${VIEW_PRODUCT}/${productId}`);
+    return response?.data;
+  } catch (error) {
+    toast.error(error.response?.data || "Error fetching products");
+    throw error;
+  }
+};
+
+export const editProduct = async (productId, formData) => {
+  try {
+    const response = await multipartAPI.put(
+      `${EDIT_PRODUCT}/${productId}`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    toast.error(error.response?.data);
+    return error;
+  }
+};
+
+export const editImage = async (formData) => {
+  try {
+    const response = await multipartAPI.post(CHANGE_IMAGE, formData);
+    return response?.data;
+  } catch (error) {
+    toast.error(error.response?.data);
+    return error;
+  }
+};
 export default API;

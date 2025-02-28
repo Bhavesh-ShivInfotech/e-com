@@ -3,6 +3,18 @@ import PropTypes from "prop-types";
 import moment from "moment";
 import { Table } from "reactstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+
+// const ResultsCount = ({ currentPage, rowsPerPage, totalRows }) => {
+//   const startRow = (currentPage - 1) * rowsPerPage + 1;
+//   const endRow = Math.min(currentPage * rowsPerPage, totalRows);
+
+//   return (
+//     <div className="mb-3">
+//       Showing {startRow} to {endRow} of {totalRows} results
+//     </div>
+//   );
+// };
+
 const BaseTable = ({
   columns,
   data,
@@ -16,6 +28,9 @@ const BaseTable = ({
   error,
   sortColumn,
   sortDirection,
+  // currentPage,
+  // rowsPerPage,
+  // totalRows,
 }) => {
   const formatDate = (date) => {
     if (!date) return "N/A";
@@ -33,6 +48,11 @@ const BaseTable = ({
   };
   return (
     <div className="table-responsive ">
+      {/* <ResultsCount
+        currentPage={currentPage}
+        rowsPerPage={rowsPerPage}
+        totalRows={totalRows}
+      /> */}
       <Table
         responsive
         className="align-middle table-nowrap  table-striped-columns"
@@ -144,6 +164,9 @@ BaseTable.propTypes = {
   error: PropTypes.string,
   sortColumn: PropTypes.string,
   sortDirection: PropTypes.string,
+  currentPage: PropTypes.number.isRequired,
+  rowsPerPage: PropTypes.number.isRequired,
+  totalRows: PropTypes.number.isRequired,
 };
 
 BaseTable.defaultProps = {

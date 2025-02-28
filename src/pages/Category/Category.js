@@ -39,6 +39,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./Category.css";
 import "../../index.css";
 import ImageError from "../../../src/assets/images/auth-one-bg.jpg";
+const MESSSAGE = "Are you Sure You want to Remove this Record?";
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
@@ -243,18 +244,20 @@ const Category = () => {
     return 0;
   });
 
+  const totalRows = sortedCategories.length;
   const totalPages = Math.ceil(sortedCategories.length / rowsPerPage);
   const currentRows = sortedCategories.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
-
+  const startRow = (currentPage - 1) * rowsPerPage + 1;
+  const endRow = Math.min(currentPage * rowsPerPage, totalRows);
   const columns = [
     {
       key: "id",
       title: "ID",
       sortable: true,
-      onClick: () => handleSort("name"),
+      onClick: () => handleSort("id"),
     },
     {
       key: "name",
@@ -369,12 +372,18 @@ const Category = () => {
                           sortColumn={sortColumn}
                           sortDirection={sortDirection}
                         />
-                        <div className="d-flex justify-content-sm-end">
-                          <Pagination
-                            totalPages={totalPages}
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
-                          />
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div className="text-muted">
+                            Showing {startRow} to {endRow} of {totalRows}{" "}
+                            results
+                          </div>
+                          <div className="d-flex justify-content-sm-end">
+                            <Pagination
+                              totalPages={totalPages}
+                              currentPage={currentPage}
+                              setCurrentPage={setCurrentPage}
+                            />
+                          </div>
                         </div>
                       </div>
                     </CardBody>
@@ -491,7 +500,7 @@ const Category = () => {
         <CommonDeleteModal
           isOpen={modal_delete}
           toggle={tog_delete}
-          message="Are you Sure You want to Remove this Record?"
+          message={MESSSAGE}
           confirmDelete={confirmDelete}
         />
       </Layout>
