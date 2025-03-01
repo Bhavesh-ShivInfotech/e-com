@@ -59,6 +59,7 @@ const AddProduct = () => {
   const [imageLoading, setImageLoading] = useState(false);
   const [product, setProduct] = useState({
     is_prescription: true,
+    vendor_id: 2,
     name: "",
     description: "",
     category_id: 0,
@@ -80,7 +81,7 @@ const AddProduct = () => {
   const requiredMessage = (field) => {
     return `${field} is required`;
   };
-  const [validator] = useState(
+  const validator = useRef(
     new SimpleReactValidator({
       className: "error-message",
       messages: {
@@ -93,6 +94,7 @@ const AddProduct = () => {
   );
   const appendFormData = (product, newImage, formData) => {
     formData.append("is_prescription", product.is_prescription);
+    formData.append("vendor_id", Number(product.vendor_id));
     formData.append("name", product.name);
     formData.append("description", product.description);
     formData.append("category_id", Number(product.category_id));
@@ -122,6 +124,7 @@ const AddProduct = () => {
             const productData = response.data[0];
             setProduct({
               is_prescription: true,
+              vendor_id: Number(productData.vendor_id),
               name: productData.name,
               description: productData.description,
               category_id: Number(productData.category_id),
@@ -157,6 +160,7 @@ const AddProduct = () => {
     } else {
       setProduct({
         is_prescription: true,
+        vendor_id: 2,
         name: "",
         description: "",
         category_id: 0,
@@ -192,7 +196,7 @@ const AddProduct = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProduct({ ...product, [name]: value });
-    validator.showMessageFor(name);
+    validator.current.showMessageFor(name);
   };
 
   const updateSelectedImage = (acceptedFiles) => {
@@ -329,10 +333,12 @@ const AddProduct = () => {
                                 name="name"
                                 value={product.name}
                                 onChange={handleChange}
-                                onBlur={() => validator.showMessageFor("name")}
+                                onBlur={() =>
+                                  validator.current.showMessageFor("name")
+                                }
                                 required
                               />
-                              {validator.message(
+                              {validator.current.message(
                                 "name",
                                 product.name,
                                 "required"
@@ -347,7 +353,9 @@ const AddProduct = () => {
                                 value={product.category_id}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.showMessageFor("category_id")
+                                  validator.current.showMessageFor(
+                                    "category_id"
+                                  )
                                 }
                                 required
                               >
@@ -361,7 +369,7 @@ const AddProduct = () => {
                                   </option>
                                 ))}
                               </Form.Select>
-                              {validator.message(
+                              {validator.current.message(
                                 "category_id",
                                 product.category_id,
                                 "required"
@@ -382,11 +390,13 @@ const AddProduct = () => {
                                 value={product.description}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.showMessageFor("description")
+                                  validator.current.showMessageFor(
+                                    "description"
+                                  )
                                 }
                                 required
                               />
-                              {validator.message(
+                              {validator.current.message(
                                 "description",
                                 product.description,
                                 "required"
@@ -405,10 +415,12 @@ const AddProduct = () => {
                                 name="price"
                                 value={product.price}
                                 onChange={handleChange}
-                                onBlur={() => validator.showMessageFor("price")}
+                                onBlur={() =>
+                                  validator.current.showMessageFor("price")
+                                }
                                 required
                               />
-                              {validator.message(
+                              {validator.current.message(
                                 "price",
                                 product.price,
                                 "required"
@@ -426,11 +438,11 @@ const AddProduct = () => {
                                 value={product.quantity}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.showMessageFor("quantity")
+                                  validator.current.showMessageFor("quantity")
                                 }
                                 required
                               />
-                              {validator.message(
+                              {validator.current.message(
                                 "quantity",
                                 product.quantity,
                                 "required"
@@ -451,11 +463,13 @@ const AddProduct = () => {
                                 value={product.metaTagTitle}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.showMessageFor("metaTagTitle")
+                                  validator.current.showMessageFor(
+                                    "metaTagTitle"
+                                  )
                                 }
                                 required
                               />
-                              {validator.message(
+                              {validator.current.message(
                                 "metaTagTitle",
                                 product.metaTagTitle,
                                 "required"
@@ -476,11 +490,13 @@ const AddProduct = () => {
                                 value={product.metaTagDescription}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.showMessageFor("metaTagDescription")
+                                  validator.current.showMessageFor(
+                                    "metaTagDescription"
+                                  )
                                 }
                                 required
                               />
-                              {validator.message(
+                              {validator.current.message(
                                 "metaTagDescription",
                                 product.metaTagDescription,
                                 "required"
@@ -501,11 +517,13 @@ const AddProduct = () => {
                                 value={product.metaTagKeywords}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.showMessageFor("metaTagKeywords")
+                                  validator.current.showMessageFor(
+                                    "metaTagKeywords"
+                                  )
                                 }
                                 required
                               />
-                              {validator.message(
+                              {validator.current.message(
                                 "metaTagKeywords",
                                 product.metaTagKeywords,
                                 "required"
@@ -531,11 +549,13 @@ const AddProduct = () => {
                                 value={product.composition}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.showMessageFor("composition")
+                                  validator.current.showMessageFor(
+                                    "composition"
+                                  )
                                 }
                                 required
                               />
-                              {validator.message(
+                              {validator.current.message(
                                 "composition",
                                 product.composition,
                                 "required"
@@ -554,11 +574,13 @@ const AddProduct = () => {
                                 value={product.presentation}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.showMessageFor("presentation")
+                                  validator.current.showMessageFor(
+                                    "presentation"
+                                  )
                                 }
                                 required
                               />
-                              {validator.message(
+                              {validator.current.message(
                                 "presentation",
                                 product.presentation,
                                 "required"
@@ -578,11 +600,11 @@ const AddProduct = () => {
                                 value={product.storage}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.showMessageFor("storage")
+                                  validator.current.showMessageFor("storage")
                                 }
                                 required
                               />
-                              {validator.message(
+                              {validator.current.message(
                                 "storage",
                                 product.storage,
                                 "required"
@@ -601,11 +623,11 @@ const AddProduct = () => {
                                 value={product.indication}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.showMessageFor("indication")
+                                  validator.current.showMessageFor("indication")
                                 }
                                 required
                               />
-                              {validator.message(
+                              {validator.current.message(
                                 "indication",
                                 product.indication,
                                 "required"
@@ -624,10 +646,12 @@ const AddProduct = () => {
                                 name="dose"
                                 value={product.dose}
                                 onChange={handleChange}
-                                onBlur={() => validator.showMessageFor("dose")}
+                                onBlur={() =>
+                                  validator.current.showMessageFor("dose")
+                                }
                                 required
                               />
-                              {validator.message(
+                              {validator.current.message(
                                 "dose",
                                 product.dose,
                                 "required"
@@ -646,11 +670,11 @@ const AddProduct = () => {
                                 value={product.shelfLife}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.showMessageFor("shelfLife")
+                                  validator.current.showMessageFor("shelfLife")
                                 }
                                 required
                               />
-                              {validator.message(
+                              {validator.current.message(
                                 "shelfLife",
                                 product.shelfLife,
                                 "required"

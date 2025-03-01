@@ -46,23 +46,21 @@ const Product = () => {
     event.target.src = defaultImageSrc;
   };
 
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const response = await fetchProducts();
-        setProducts(
-          Array.isArray(response.data?.item) ? response.data.item : []
-        );
-      } catch (err) {
-        console.error("Error fetching products:", err);
-        setProducts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProducts();
+  const loadProducts = useCallback(async () => {
+    try {
+      const response = await fetchProducts();
+      setProducts(Array.isArray(response.data?.item) ? response.data.item : []);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   const handleSort = (column) => {
     if (sortColumn === column) {
