@@ -1,4 +1,4 @@
-export const SALES_COLUMNS = (handleSort) => [
+export const SALES_COLUMNS = (handleSort, formatCurrency) => [
   {
     key: "noOfOrder",
     title: "Order",
@@ -11,11 +11,11 @@ export const SALES_COLUMNS = (handleSort) => [
     sortable: true,
     onClick: () => handleSort("noOfProduct"),
   },
-  { key: "tax", title: "Tax" },
-  { key: "total", title: "Total" },
+  { key: "tax", title: "Tax", render: (value) => formatCurrency(value) },
+  { key: "total", title: "Total", render: (value) => formatCurrency(value) },
 ];
 
-export const PURCHASE_COLUMNS = (handleSort) => [
+export const PURCHASE_COLUMNS = (handleSort, formatCurrency) => [
   {
     key: "name",
     title: "Name",
@@ -33,6 +33,7 @@ export const PURCHASE_COLUMNS = (handleSort) => [
     title: "Price",
     sortable: true,
     onClick: () => handleSort("price"),
+    render: (value) => formatCurrency(value),
   },
-  { key: "total", title: "Total" },
+  { key: "total", title: "Total", render: (value) => formatCurrency(value) },
 ];

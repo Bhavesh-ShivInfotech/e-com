@@ -111,10 +111,14 @@ const Report = () => {
     setCurrentPage(1);
   };
 
+  const formatCurrency = (value) => {
+    return `₹${value}`;
+  };
+
   const columns =
     reportType === "Sales"
-      ? SALES_COLUMNS(handleSort)
-      : PURCHASE_COLUMNS(handleSort);
+      ? SALES_COLUMNS(handleSort, formatCurrency)
+      : PURCHASE_COLUMNS(handleSort, formatCurrency);
 
   return (
     <Layout>
