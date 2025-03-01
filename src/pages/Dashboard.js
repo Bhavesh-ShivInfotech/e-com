@@ -56,6 +56,10 @@ const Dashboard = () => {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    document.title = "Dashboard";
+  }, []);
   return (
     <Layout>
       {loading ? (

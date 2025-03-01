@@ -76,17 +76,21 @@ const AddProduct = () => {
   });
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [newImage, setNewImage] = useState(null);
-  const validator = useRef(
+
+  const requiredMessage = (field) => {
+    return `${field} is required`;
+  };
+  const [validator] = useState(
     new SimpleReactValidator({
       className: "error-message",
-      autoForceUpdate: this,
+      messages: {
+        required: requiredMessage("Field"),
+        name: "Name is required.",
+        description: "Description is required.",
+        image: "Image is required.",
+      },
     })
   );
-
-  const getValidationMessage = (fieldName, value, rules) => {
-    return validator.current.message(fieldName, value, rules);
-  };
-
   const appendFormData = (product, newImage, formData) => {
     formData.append("is_prescription", product.is_prescription);
     formData.append("name", product.name);
@@ -188,7 +192,7 @@ const AddProduct = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProduct({ ...product, [name]: value });
-    validator.current.showMessageFor(name);
+    validator.showMessageFor(name);
   };
 
   const updateSelectedImage = (acceptedFiles) => {
@@ -316,21 +320,22 @@ const AddProduct = () => {
                         <Row>
                           <Col md={6}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Product Name</Form.Label>
+                              <Form.Label>
+                                Product Name{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
                               <Form.Control
                                 type="text"
                                 name="name"
                                 value={product.name}
                                 onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor("name")
-                                }
+                                onBlur={() => validator.showMessageFor("name")}
                                 required
                               />
-                              {getValidationMessage(
+                              {validator.message(
                                 "name",
                                 product.name,
-                                "required|min:3|max:50"
+                                "required"
                               )}
                             </Form.Group>
                           </Col>
@@ -342,20 +347,21 @@ const AddProduct = () => {
                                 value={product.category_id}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "category_id"
-                                  )
+                                  validator.showMessageFor("category_id")
                                 }
                                 required
                               >
-                                <option value="">Select Category</option>
+                                <option value="">
+                                  Select Category{" "}
+                                  <span className="text-danger">*</span>
+                                </option>
                                 {categories.map((cat) => (
                                   <option key={cat.id} value={cat.id}>
                                     {cat.name}
                                   </option>
                                 ))}
                               </Form.Select>
-                              {getValidationMessage(
+                              {validator.message(
                                 "category_id",
                                 product.category_id,
                                 "required"
@@ -366,20 +372,21 @@ const AddProduct = () => {
                         <Row>
                           <Col md={12}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Product Description</Form.Label>
+                              <Form.Label>
+                                Product Description{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
                               <Form.Control
                                 type="text"
                                 name="description"
                                 value={product.description}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "description"
-                                  )
+                                  validator.showMessageFor("description")
                                 }
                                 required
                               />
-                              {getValidationMessage(
+                              {validator.message(
                                 "description",
                                 product.description,
                                 "required"
@@ -390,18 +397,18 @@ const AddProduct = () => {
                         <Row>
                           <Col md={6}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Price</Form.Label>
+                              <Form.Label>
+                                Price <span className="text-danger">*</span>
+                              </Form.Label>
                               <Form.Control
                                 type="number"
                                 name="price"
                                 value={product.price}
                                 onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor("price")
-                                }
+                                onBlur={() => validator.showMessageFor("price")}
                                 required
                               />
-                              {getValidationMessage(
+                              {validator.message(
                                 "price",
                                 product.price,
                                 "required"
@@ -410,18 +417,20 @@ const AddProduct = () => {
                           </Col>
                           <Col md={6}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Quantity</Form.Label>
+                              <Form.Label>
+                                Quantity <span className="text-danger">*</span>
+                              </Form.Label>
                               <Form.Control
                                 type="number"
                                 name="quantity"
                                 value={product.quantity}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.current.showMessageFor("quantity")
+                                  validator.showMessageFor("quantity")
                                 }
                                 required
                               />
-                              {getValidationMessage(
+                              {validator.message(
                                 "quantity",
                                 product.quantity,
                                 "required"
@@ -432,20 +441,21 @@ const AddProduct = () => {
                         <Row>
                           <Col md={12}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Meta Tag Title</Form.Label>
+                              <Form.Label>
+                                Meta Tag Title{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
                               <Form.Control
                                 type="text"
                                 name="metaTagTitle"
                                 value={product.metaTagTitle}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "metaTagTitle"
-                                  )
+                                  validator.showMessageFor("metaTagTitle")
                                 }
                                 required
                               />
-                              {getValidationMessage(
+                              {validator.message(
                                 "metaTagTitle",
                                 product.metaTagTitle,
                                 "required"
@@ -456,20 +466,21 @@ const AddProduct = () => {
                         <Row>
                           <Col md={12}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Meta Tag Description</Form.Label>
+                              <Form.Label>
+                                Meta Tag Description{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
                               <Form.Control
                                 type="text"
                                 name="metaTagDescription"
                                 value={product.metaTagDescription}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "metaTagDescription"
-                                  )
+                                  validator.showMessageFor("metaTagDescription")
                                 }
                                 required
                               />
-                              {getValidationMessage(
+                              {validator.message(
                                 "metaTagDescription",
                                 product.metaTagDescription,
                                 "required"
@@ -480,20 +491,21 @@ const AddProduct = () => {
                         <Row>
                           <Col md={12}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Meta Tag Keywords</Form.Label>
+                              <Form.Label>
+                                Meta Tag Keywords{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
                               <Form.Control
                                 type="text"
                                 name="metaTagKeywords"
                                 value={product.metaTagKeywords}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "metaTagKeywords"
-                                  )
+                                  validator.showMessageFor("metaTagKeywords")
                                 }
                                 required
                               />
-                              {getValidationMessage(
+                              {validator.message(
                                 "metaTagKeywords",
                                 product.metaTagKeywords,
                                 "required"
@@ -509,20 +521,21 @@ const AddProduct = () => {
                         <Row>
                           <Col md={6}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Composition</Form.Label>
+                              <Form.Label>
+                                Composition{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
                               <Form.Control
                                 type="text"
                                 name="composition"
                                 value={product.composition}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "composition"
-                                  )
+                                  validator.showMessageFor("composition")
                                 }
                                 required
                               />
-                              {getValidationMessage(
+                              {validator.message(
                                 "composition",
                                 product.composition,
                                 "required"
@@ -531,20 +544,21 @@ const AddProduct = () => {
                           </Col>
                           <Col md={6}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Presentation</Form.Label>
+                              <Form.Label>
+                                Presentation{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
                               <Form.Control
                                 type="text"
                                 name="presentation"
                                 value={product.presentation}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.current.showMessageFor(
-                                    "presentation"
-                                  )
+                                  validator.showMessageFor("presentation")
                                 }
                                 required
                               />
-                              {getValidationMessage(
+                              {validator.message(
                                 "presentation",
                                 product.presentation,
                                 "required"
@@ -555,18 +569,20 @@ const AddProduct = () => {
                         <Row>
                           <Col md={6}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Storage</Form.Label>
+                              <Form.Label>
+                                Storage <span className="text-danger">*</span>
+                              </Form.Label>
                               <Form.Control
                                 type="text"
                                 name="storage"
                                 value={product.storage}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.current.showMessageFor("storage")
+                                  validator.showMessageFor("storage")
                                 }
                                 required
                               />
-                              {getValidationMessage(
+                              {validator.message(
                                 "storage",
                                 product.storage,
                                 "required"
@@ -575,18 +591,21 @@ const AddProduct = () => {
                           </Col>
                           <Col md={6}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Indication</Form.Label>
+                              <Form.Label>
+                                Indication{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
                               <Form.Control
                                 type="text"
                                 name="indication"
                                 value={product.indication}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.current.showMessageFor("indication")
+                                  validator.showMessageFor("indication")
                                 }
                                 required
                               />
-                              {getValidationMessage(
+                              {validator.message(
                                 "indication",
                                 product.indication,
                                 "required"
@@ -597,18 +616,18 @@ const AddProduct = () => {
                         <Row>
                           <Col md={6}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Dose</Form.Label>
+                              <Form.Label>
+                                Dose <span className="text-danger">*</span>
+                              </Form.Label>
                               <Form.Control
                                 type="text"
                                 name="dose"
                                 value={product.dose}
                                 onChange={handleChange}
-                                onBlur={() =>
-                                  validator.current.showMessageFor("dose")
-                                }
+                                onBlur={() => validator.showMessageFor("dose")}
                                 required
                               />
-                              {getValidationMessage(
+                              {validator.message(
                                 "dose",
                                 product.dose,
                                 "required"
@@ -617,18 +636,21 @@ const AddProduct = () => {
                           </Col>
                           <Col md={6}>
                             <Form.Group className="mb-3">
-                              <Form.Label>Shelf Life</Form.Label>
+                              <Form.Label>
+                                Shelf Life{" "}
+                                <span className="text-danger">*</span>
+                              </Form.Label>
                               <Form.Control
                                 type="text"
                                 name="shelfLife"
                                 value={product.shelfLife}
                                 onChange={handleChange}
                                 onBlur={() =>
-                                  validator.current.showMessageFor("shelfLife")
+                                  validator.showMessageFor("shelfLife")
                                 }
                                 required
                               />
-                              {getValidationMessage(
+                              {validator.message(
                                 "shelfLife",
                                 product.shelfLife,
                                 "required"
@@ -641,7 +663,9 @@ const AddProduct = () => {
 
                     {activeTab === PRODUCT_MODULE.TABS.IMAGE.EVENT_KEY && (
                       <div className="section p-4 border rounded">
-                        <h5 className="fs-15 mb-1">Product Gallery</h5>
+                        <h5 className="fs-15 mb-1">
+                          Product Gallery <span className="text-danger">*</span>
+                        </h5>
                         <p className="text-muted">
                           Add Product Gallery Images.
                         </p>

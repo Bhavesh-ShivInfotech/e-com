@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Button,
-  Form,
-  Spinner,
-} from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Form } from "react-bootstrap";
 import Layout from "../../Layouts";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Report1.css";
@@ -16,7 +8,11 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import BaseTable from "../Table/BaseTable";
 import Pagination from "../../Components/Common/Pagination";
-
+import RowsPerPage from "../../Components/Common/RowsPerPage";
+import { ResponseStatusEnum } from "../../Components/constants/httpStatusCodes";
+import Spinner from "../../Components/Common/Spinner";
+import { SALES_COLUMNS, PURCHASE_COLUMNS } from "./ReportConstants";
+document.title = "Report";
 const Report = () => {
   const [reportType, setReportType] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -26,8 +22,9 @@ const Report = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
   useEffect(() => {
     if (reportType) {
       fetchReportData();
@@ -38,53 +35,95 @@ const Report = () => {
     setLoading(true);
     setError("");
     try {
+      const payload = {};
+      if (startDate) {
+        payload.startDate = startDate;
+      }
+      if (endDate) {
+        payload.endDate = endDate;
+      }
+      if (reportType === "Purchase" && status !== "") {
+        payload.status = status === "true";
+      }
       const response =
-        reportType === "Sales" ? await fetchsales() : await fetchpurchase();
-      setReportData(response?.data?.product || response?.data || []);
-      toast.success(response.message);
+        reportType === "Sales"
+          ? await fetchsales(payload)
+          : await fetchpurchase(payload);
+
+      if (response?.status === ResponseStatusEnum.SUCCESS) {
+        setReportData(response.data.product || response.data || []);
+        toast.success(response.message);
+      } else {
+        setReportData([]);
+        toast.error(response.message);
+      }
     } catch (error) {
-      setError(error.message || "An error occurred");
-      toast.error(error.message || "Failed to fetch data");
+      setError(error.message);
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     fetchReportData();
   };
 
-  const currentItems = reportData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+  const validateEndDate = (date) => {
+    const today = new Date().toISOString().split("T")[0];
+    return date <= today;
+  };
+
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const sortedReportData = [...reportData].sort((a, b) => {
+    if (sortColumn) {
+      const aValue = a[sortColumn];
+      const bValue = b[sortColumn];
+
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return sortDirection === "asc"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      } else {
+        return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+      }
+    }
+    return 0;
+  });
+
+  const totalRows = reportData.length;
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+  const currentItems = sortedReportData.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
   );
+
+  const handleRowsPerPageChange = (e) => {
+    setRowsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
 
   const columns =
     reportType === "Sales"
-      ? [
-          { key: "noOfOrder", title: "Order" },
-          { key: "noOfProduct", title: "Product" },
-          { key: "tax", title: "Tax" },
-          { key: "total", title: "Total" },
-        ]
-      : [
-          { key: "name", title: "Name" },
-          { key: "quantity", title: "Quantity" },
-          { key: "price", title: "Price" },
-          { key: "total", title: "Total" },
-        ];
+      ? SALES_COLUMNS(handleSort)
+      : PURCHASE_COLUMNS(handleSort);
 
   return (
     <Layout>
+      {loading && <Spinner />}
       <div className="page-content">
         <Container fluid className="px-4 mb-4 addproduct-container">
-          <Row className="align-items-center addproduct-title">
+          <Row className="align-items-center addreport-title">
             <Col>
               <h2>Report</h2>
-            </Col>
-            <Col className="text-end">
-              <Button variant="secondary">Back</Button>
             </Col>
           </Row>
           <Row>
@@ -122,6 +161,7 @@ const Report = () => {
                               type="date"
                               value={startDate}
                               onChange={(e) => setStartDate(e.target.value)}
+                              max={new Date().toISOString().split("T")[0]}
                             />
                           </Form.Group>
                         </Col>
@@ -131,11 +171,20 @@ const Report = () => {
                             <Form.Control
                               type="date"
                               value={endDate}
-                              onChange={(e) => setEndDate(e.target.value)}
+                              onChange={(e) => {
+                                if (validateEndDate(e.target.value)) {
+                                  setEndDate(e.target.value);
+                                } else {
+                                  toast.error(
+                                    "End date cannot be a future date."
+                                  );
+                                }
+                              }}
+                              max={new Date().toISOString().split("T")[0]}
                             />
                           </Form.Group>
                         </Col>
-                        {reportType === "purchase" && (
+                        {reportType === "Purchase" && (
                           <Col md={4}>
                             <Form.Group>
                               <Form.Label>Status</Form.Label>
@@ -167,23 +216,37 @@ const Report = () => {
 
                     {error && <p className="text-danger mt-3">{error}</p>}
 
-                    {loading ? (
-                      <div className="text-center mt-3">
-                        <Spinner animation="border" />
-                      </div>
-                    ) : reportData.length > 0 ? (
+                    {reportData.length > 0 ? (
                       <>
+                        <Row className="g-4 mb-3">
+                          <Col className="col-sm-auto">
+                            <RowsPerPage
+                              rowsPerPage={rowsPerPage}
+                              handleRowsPerPageChange={handleRowsPerPageChange}
+                            />
+                          </Col>
+                        </Row>
                         <BaseTable
                           data={currentItems}
                           columns={columns}
                           reportType={reportType}
+                          sortColumn={sortColumn}
+                          sortDirection={sortDirection}
                         />
-                        <Pagination
-                          totalItems={reportData.length}
-                          itemsPerPage={itemsPerPage}
-                          currentPage={currentPage}
-                          setCurrentPage={setCurrentPage}
-                        />
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div className="text-muted">
+                            Showing {(currentPage - 1) * rowsPerPage + 1} to{" "}
+                            {Math.min(currentPage * rowsPerPage, totalRows)} of{" "}
+                            {totalRows} results
+                          </div>
+                          <div className="d-flex justify-content-sm-end">
+                            <Pagination
+                              totalPages={totalPages}
+                              currentPage={currentPage}
+                              setCurrentPage={setCurrentPage}
+                            />
+                          </div>
+                        </div>
                       </>
                     ) : (
                       <p className="text-muted mt-3">No data available.</p>

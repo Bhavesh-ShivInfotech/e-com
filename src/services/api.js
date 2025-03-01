@@ -189,13 +189,13 @@ export const editImage = async (formData) => {
   }
 };
 
-export const fetchsales = async () => {
-  const response = await API.post(SALES_REPORT);
+export const fetchsales = async (payload = {}) => {
+  const response = await API.post(SALES_REPORT, payload);
   return response?.data;
 };
 
-export const fetchpurchase = async () => {
-  const response = await API.post(PURCHASE_REPORT);
+export const fetchpurchase = async (payload = {}) => {
+  const response = await API.post(PURCHASE_REPORT, payload);
   return response?.data;
 };
 

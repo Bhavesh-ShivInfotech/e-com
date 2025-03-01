@@ -1,11 +1,15 @@
 import ImageError from "../../assets/images/auth-one-bg.jpg";
-import "./Product.css";
-export const PRODUCT_COLUMNS = (handleSort, navigate, handleDeleteClick) => [
+import "./Category.css";
+export const CATEGORY_COLUMNS = (
+  handleSort,
+  handleEditClick,
+  handleDeleteClick
+) => [
   {
-    key: "product_id",
-    title: "Product ID",
+    key: "id",
+    title: "ID",
     sortable: true,
-    onClick: () => handleSort("product_id"),
+    onClick: () => handleSort("id"),
   },
   {
     key: "name",
@@ -19,7 +23,6 @@ export const PRODUCT_COLUMNS = (handleSort, navigate, handleDeleteClick) => [
     sortable: true,
     onClick: () => handleSort("description"),
   },
-  { key: "price", title: "Price" },
   {
     key: "image",
     title: "Image",
@@ -27,7 +30,7 @@ export const PRODUCT_COLUMNS = (handleSort, navigate, handleDeleteClick) => [
       <img
         src={image || ImageError}
         alt="product"
-        className="img-thumbnail onerror-img-pro"
+        className="img-thumbnail onerror-img"
         onError={(e) => (e.target.src = ImageError)}
       />
     ),
@@ -39,7 +42,7 @@ export const PRODUCT_COLUMNS = (handleSort, navigate, handleDeleteClick) => [
       <div className="d-flex gap-2">
         <button
           className="btn btn-sm btn-success edit-item-btn"
-          onClick={() => navigate(`/edit-product/${row.product_id}`)}
+          onClick={() => handleEditClick(row)}
         >
           Edit
         </button>
