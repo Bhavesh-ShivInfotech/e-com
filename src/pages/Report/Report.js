@@ -12,8 +12,25 @@ import RowsPerPage from "../../Components/Common/RowsPerPage";
 import { ResponseStatusEnum } from "../../Components/constants/httpStatusCodes";
 import Spinner from "../../Components/Common/Spinner";
 import { SALES_COLUMNS, PURCHASE_COLUMNS } from "./ReportConstants";
-document.title = "Report";
+const REPORT_MODULE = {
+  REPORT_TITLE: "Report",
+  REPORT_PURCHASE: "Purchase",
+  REPORT_SALES: "Sales",
+  STATUS_TRUE: "true",
+  ORDER_ASC: "asc",
+  ORDER_DESC: "desc",
+  STRING_VALUE: "string",
+  CONTROL_ID: "reportType",
+  START_DATE: "startDate",
+  END_DATE: "endDate",
+  GENERATE_REPORT: "Generate Report",
+  TRUE: "true",
+  FALSE: "false",
+  MESSAGE: "End date cannot be a future date.",
+  DATE: "date",
+};
 const Report = () => {
+  document.title = REPORT_MODULE.REPORT_TITLE;
   const [reportType, setReportType] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -24,7 +41,7 @@ const Report = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sortColumn, setSortColumn] = useState(null);
-  const [sortDirection, setSortDirection] = useState("asc");
+  const [sortDirection, setSortDirection] = useState(REPORT_MODULE.ORDER_ASC);
   useEffect(() => {
     if (reportType) {
       fetchReportData();
@@ -42,11 +59,11 @@ const Report = () => {
       if (endDate) {
         payload.endDate = endDate;
       }
-      if (reportType === "Purchase" && status !== "") {
-        payload.status = status === "true";
+      if (reportType === REPORT_MODULE.REPORT_PURCHASE && status !== "") {
+        payload.status = status === REPORT_MODULE.STATUS_TRUE;
       }
       const response =
-        reportType === "Sales"
+        reportType === REPORT_MODULE.REPORT_SALES
           ? await fetchsales(payload)
           : await fetchpurchase(payload);
 
@@ -76,10 +93,14 @@ const Report = () => {
 
   const handleSort = (column) => {
     if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(
+        sortDirection === REPORT_MODULE.ORDER_ASC
+          ? REPORT_MODULE.ORDER_DESC
+          : REPORT_MODULE.ORDER_ASC
+      );
     } else {
       setSortColumn(column);
-      setSortDirection("asc");
+      setSortDirection(REPORT_MODULE.ORDER_ASC);
     }
   };
 
@@ -88,12 +109,17 @@ const Report = () => {
       const aValue = a[sortColumn];
       const bValue = b[sortColumn];
 
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return sortDirection === "asc"
+      if (
+        typeof aValue === REPORT_MODULE.STRING_VALUE &&
+        typeof bValue === REPORT_MODULE.STRING_VALUE
+      ) {
+        return sortDirection === REPORT_MODULE.ORDER_ASC
           ? aValue.localeCompare(bValue)
           : bValue.localeCompare(aValue);
       } else {
-        return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+        return sortDirection === REPORT_MODULE.ORDER_ASC
+          ? aValue - bValue
+          : bValue - aValue;
       }
     }
     return 0;
@@ -116,7 +142,7 @@ const Report = () => {
   };
 
   const columns =
-    reportType === "Sales"
+    reportType === REPORT_MODULE.REPORT_SALES
       ? SALES_COLUMNS(handleSort, formatCurrency)
       : PURCHASE_COLUMNS(handleSort, formatCurrency);
 
@@ -134,15 +160,19 @@ const Report = () => {
             <Col xl={12} md={12}>
               <Card>
                 <Card.Header>
-                  <Form.Group controlId="reportType">
+                  <Form.Group controlId={REPORT_MODULE.CONTROL_ID}>
                     <Form.Label>Select Report Type</Form.Label>
                     <Form.Select
                       value={reportType}
                       onChange={(e) => setReportType(e.target.value)}
                     >
                       <option value="">Select a report type</option>
-                      <option value="Sales">Sales Report</option>
-                      <option value="Purchase">Purchase Report</option>
+                      <option value={REPORT_MODULE.REPORT_SALES}>
+                        Sales Report
+                      </option>
+                      <option value={REPORT_MODULE.REPORT_PURCHASE}>
+                        Purchase Report
+                      </option>
                     </Form.Select>
                   </Form.Group>
                 </Card.Header>
@@ -158,37 +188,39 @@ const Report = () => {
                         </Col>
                       </Row>
                       <Row>
-                        <Col md={reportType === "Sales" ? 6 : 4}>
-                          <Form.Group controlId="startDate">
+                        <Col
+                          md={reportType === REPORT_MODULE.REPORT_SALES ? 6 : 4}
+                        >
+                          <Form.Group controlId={REPORT_MODULE.START_DATE}>
                             <Form.Label>Start Date</Form.Label>
                             <Form.Control
-                              type="date"
+                              type={REPORT_MODULE.DATE}
                               value={startDate}
                               onChange={(e) => setStartDate(e.target.value)}
                               max={new Date().toISOString().split("T")[0]}
                             />
                           </Form.Group>
                         </Col>
-                        <Col md={reportType === "Sales" ? 6 : 4}>
-                          <Form.Group controlId="endDate">
+                        <Col
+                          md={reportType === REPORT_MODULE.REPORT_SALES ? 6 : 4}
+                        >
+                          <Form.Group controlId={REPORT_MODULE.END_DATE}>
                             <Form.Label>End Date</Form.Label>
                             <Form.Control
-                              type="date"
+                              type={REPORT_MODULE.DATE}
                               value={endDate}
                               onChange={(e) => {
                                 if (validateEndDate(e.target.value)) {
                                   setEndDate(e.target.value);
                                 } else {
-                                  toast.error(
-                                    "End date cannot be a future date."
-                                  );
+                                  toast.error(REPORT_MODULE.MESSAGE);
                                 }
                               }}
                               max={new Date().toISOString().split("T")[0]}
                             />
                           </Form.Group>
                         </Col>
-                        {reportType === "Purchase" && (
+                        {reportType === REPORT_MODULE.REPORT_PURCHASE && (
                           <Col md={4}>
                             <Form.Group>
                               <Form.Label>Status</Form.Label>
@@ -197,8 +229,10 @@ const Report = () => {
                                 onChange={(e) => setStatus(e.target.value)}
                               >
                                 <option value="">Select a status</option>
-                                <option value="true">True</option>
-                                <option value="false">False</option>
+                                <option value={REPORT_MODULE.TRUE}>True</option>
+                                <option value={REPORT_MODULE.FALSE}>
+                                  False
+                                </option>
                               </Form.Select>
                             </Form.Group>
                           </Col>
@@ -213,7 +247,7 @@ const Report = () => {
                         {loading ? (
                           <Spinner size="sm" animation="border" />
                         ) : (
-                          "Generate Report"
+                          REPORT_MODULE.GENERATE_REPORT
                         )}
                       </Button>
                     </Form>
