@@ -12,6 +12,8 @@ import {
   EDIT_PRODUCT,
   CHANGE_IMAGE,
   VIEW_PRODUCT,
+  SALES_REPORT,
+  PURCHASE_REPORT,
 } from "./apiendpoints";
 import { CallSharp, Category } from "@mui/icons-material";
 // import { config } from "webpack";
@@ -186,4 +188,15 @@ export const editImage = async (formData) => {
     return error;
   }
 };
+
+export const fetchsales = async (payload = {}) => {
+  const response = await API.post(SALES_REPORT, payload);
+  return response?.data;
+};
+
+export const fetchpurchase = async (payload = {}) => {
+  const response = await API.post(PURCHASE_REPORT, payload);
+  return response?.data;
+};
+
 export default API;
