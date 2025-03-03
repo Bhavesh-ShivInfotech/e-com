@@ -68,17 +68,11 @@ const Login = (props) => {
     e.preventDefault();
     setLoading(true);
 
-    if (errors.email_id || errors.password) {
-      return;
-    }
-
-    if (validator.current.allValid()) {
+    if (!validator.current.allValid()) {
       validator.current.showMessages();
-
-      setUserLogin({ ...userLogin });
+      setLoading(false);
       return;
     }
-    setLoading(true);
 
     try {
       const response = await login(
@@ -227,12 +221,7 @@ const Login = (props) => {
                             color="success"
                             className="btn btn-success w-100 fs-5 fw-bold"
                             type="submit"
-                            disabled={
-                              loading ||
-                              errors.email_id ||
-                              errors.password ||
-                              !validator.current.allValid()
-                            }
+                            disabled={loading}
                           >
                             {loading ? <Spinner size="sm" /> : "Sign In"}
                           </Button>
