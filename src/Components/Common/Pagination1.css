@@ -8,3 +8,6 @@
 .page-item.disabled {
   cursor: not-allowed;
 }
+.page-link {
+  cursor: pointer;
+}
