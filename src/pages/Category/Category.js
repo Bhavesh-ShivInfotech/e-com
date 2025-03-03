@@ -40,7 +40,6 @@ import "./Category.css";
 import "../../index.css";
 import { CATEGORY_COLUMNS } from "./CategoryConstant";
 const MESSSAGE = "Are you Sure You want to Remove this Record?";
-document.title = "Category";
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
@@ -62,6 +61,10 @@ const Category = () => {
   const navigate = useNavigate();
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
+
+  useEffect(() => {
+    document.title = "Category";
+  }, []);
 
   const handleImageError = (event, defaultImageSrc) => {
     event.target.onerror = null;
