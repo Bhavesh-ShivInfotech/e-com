@@ -40,9 +40,9 @@ import "./Category.css";
 import "../../index.css";
 import { CATEGORY_COLUMNS } from "./CategoryConstant";
 const MESSSAGE = "Are you Sure You want to Remove this Record?";
-document.title = "Category";
 
 const Category = () => {
+  document.title = "Category";
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -131,7 +131,6 @@ const Category = () => {
     if (file) {
       setCategory({ ...category, image: file });
       setPreview(URL.createObjectURL(file));
-      // validator.showMessageFor("image");
     }
   };
 
