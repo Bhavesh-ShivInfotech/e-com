@@ -109,7 +109,6 @@ const ListOfOrder = ({ data }) => {
       render: (value) => formatCurrency(value),
     },
     { key: "status", title: "Status" },
-    { key: "discount", title: "Discount" },
     { key: "tax", title: "Tax", render: (value) => formatCurrency(value) },
   ];
 
@@ -132,7 +131,9 @@ const ListOfOrder = ({ data }) => {
                   />
                   <div className="d-flex justify-content-between align-items-center">
                     <div className="text-muted">
-                      Showing {startRow} to {endRow} of {totalRows} results
+                      Showing <strong>{startRow}</strong> to{" "}
+                      <strong>{endRow}</strong> of <strong>{totalRows}</strong>{" "}
+                      results
                     </div>
                     <div className="d-flex justify-content-sm-end">
                       <Pagination

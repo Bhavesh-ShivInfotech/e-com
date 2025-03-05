@@ -46,7 +46,7 @@ const Category = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
   const [modal_list, setmodal_list] = useState(false);
   const [modal_delete, setmodal_delete] = useState(false);
@@ -58,6 +58,7 @@ const Category = () => {
   });
   const [preview, setPreview] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
@@ -71,20 +72,20 @@ const Category = () => {
     event.target.src = defaultImageSrc;
   };
 
-  const requiredMessage = (field) => {
-    return `${field} is required`;
+  const validateFields = () => {
+    let newErrors = {};
+    if (!category.name) {
+      newErrors.name = "Name is required.";
+    }
+    if (!category.description) {
+      newErrors.description = "Description is required.";
+    }
+    if (!category.image) {
+      newErrors.image = "Image is required.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
-  const [validator] = useState(
-    new SimpleReactValidator({
-      className: "error-message",
-      messages: {
-        required: requiredMessage("Field"),
-        name: "Name is required.",
-        description: "Description is required.",
-        image: "Image is required.",
-      },
-    })
-  );
 
   const tog_list = () => {
     setmodal_list(!modal_list);
@@ -92,7 +93,7 @@ const Category = () => {
       setIsEditMode(false);
       setCategory({ id: "", name: "", description: "", image: null });
       setPreview(null);
-      validator.hideMessages();
+      setErrors({});
     }
   };
 
@@ -126,7 +127,7 @@ const Category = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCategory({ ...category, [name]: value });
-    validator.showMessageFor(name);
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
   const handleImageChange = (e) => {
@@ -134,7 +135,7 @@ const Category = () => {
     if (file) {
       setCategory({ ...category, image: file });
       setPreview(URL.createObjectURL(file));
-      // validator.showMessageFor("image");
+      setErrors((prevErrors) => ({ ...prevErrors, image: "" }));
     }
   };
 
@@ -145,8 +146,7 @@ const Category = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validator.allValid()) {
-      validator.showMessages();
+    if (!validateFields()) {
       return;
     }
 
@@ -167,7 +167,7 @@ const Category = () => {
         setCategory({ id: "", name: "", description: "", image: null });
         setPreview(null);
         tog_list();
-        navigate("/category");
+        await loadCategories();
       } else {
         toast.error(response.message);
       }
@@ -329,8 +329,9 @@ const Category = () => {
                         />
                         <div className="d-flex justify-content-between align-items-center">
                           <div className="text-muted">
-                            Showing {startRow} to {endRow} of {totalRows}{" "}
-                            results
+                            Showing <strong>{startRow}</strong> to{" "}
+                            <strong>{endRow}</strong> of{" "}
+                            <strong>{totalRows}</strong> results
                           </div>
                           <div className="d-flex justify-content-sm-end">
                             <Pagination
@@ -389,9 +390,10 @@ const Category = () => {
                 name="name"
                 value={category.name}
                 onChange={handleChange}
-                onBlur={() => validator.showMessageFor("name")}
               />
-              {validator.message("name", category.name, "required")}
+              {errors.name && (
+                <div className="text-danger small">{errors.name}</div>
+              )}{" "}
             </div>
 
             <div className="mb-3">
@@ -409,12 +411,9 @@ const Category = () => {
                 name="description"
                 value={category.description}
                 onChange={handleChange}
-                onBlur={() => validator.showMessageFor("description")}
               />
-              {validator.message(
-                "description",
-                category.description,
-                "required"
+              {errors.description && (
+                <div className="text-danger small">{errors.description}</div>
               )}
             </div>
 
@@ -432,8 +431,9 @@ const Category = () => {
                 accept="image/*"
                 onChange={handleImageChange}
               />
-              {validator.message("image", category.image, "required")}
-
+              {errors.image && (
+                <div className="text-danger small">{errors.image}</div>
+              )}
               {preview && (
                 <div className="img-preview">
                   <img src={preview} alt="Preview" className="preview-img" />

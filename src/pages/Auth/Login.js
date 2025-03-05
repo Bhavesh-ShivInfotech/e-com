@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Card,
   CardBody,
@@ -23,6 +23,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./login.css";
 import { login } from "./authServices";
 import { jwtDecode } from "jwt-decode";
+
 const MESSSAGE = "Sign In";
 
 const Login = (props) => {
@@ -31,15 +32,6 @@ const Login = (props) => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-  const validator = useRef(
-    new SimpleReactValidator({
-      messages: {
-        required: "Field is required.",
-        email: "Enter a valid Email address.",
-        password: "Password is required",
-      },
-    })
-  );
 
   useEffect(() => {
     document.title = MESSSAGE;
@@ -64,12 +56,25 @@ const Login = (props) => {
     setUserLogin({ ...userLogin, [name]: trimmedValue });
   };
 
+  const validateFields = () => {
+    let newErrors = {};
+    if (!userLogin.email_id) {
+      newErrors.email_id = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userLogin.email_id)) {
+      newErrors.email_id = "Enter a proper email.";
+    }
+    if (!userLogin.password) {
+      newErrors.password = "Password is required.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    if (!validator.current.allValid()) {
-      validator.current.showMessages();
+    if (!validateFields()) {
       setLoading(false);
       return;
     }
@@ -136,21 +141,8 @@ const Login = (props) => {
                             onChange={handleChange}
                             style={{ fontFamily: "Poppins, sans-serif" }}
                           />
-                          {validator.current.message(
-                            "email_id",
-                            userLogin.email_id,
-                            "required|email"
-                          ) && (
-                            <div style={{ color: "red", fontSize: "0.875em" }}>
-                              {validator.current.message(
-                                "email_id",
-                                userLogin.email_id,
-                                "required|email"
-                              )}
-                            </div>
-                          )}
                           {errors.email_id && (
-                            <div style={{ color: "red", fontSize: "0.875em" }}>
+                            <div className="text-danger small">
                               {errors.email_id}
                             </div>
                           )}
@@ -174,29 +166,11 @@ const Login = (props) => {
                               autoComplete="new-password"
                               style={{ fontFamily: "Poppins, sans-serif" }}
                             />
-                            {validator.current.message(
-                              "password",
-                              userLogin.password,
-                              "required"
-                            ) && (
-                              <div
-                                style={{ color: "red", fontSize: "0.875em" }}
-                              >
-                                {validator.current.message(
-                                  "password",
-                                  userLogin.password,
-                                  "required"
-                                )}
-                              </div>
-                            )}
                             {errors.password && (
-                              <div
-                                style={{ color: "red", fontSize: "0.875em" }}
-                              >
+                              <div className="text-danger small">
                                 {errors.password}
                               </div>
                             )}
-
                             <button
                               className="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted shadow-none"
                               onClick={(e) => {

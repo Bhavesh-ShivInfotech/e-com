@@ -31,7 +31,6 @@ const RecentlyJoinedCustomers = ({ data }) => {
     "Email ID",
     "Date of Birth",
     "Gender",
-    "Phone Number",
     "Created At",
   ];
 
