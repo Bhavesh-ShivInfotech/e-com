@@ -167,7 +167,6 @@ const Category = () => {
         setCategory({ id: "", name: "", description: "", image: null });
         setPreview(null);
         tog_list();
-        // navigate("/category");
         await loadCategories();
       } else {
         toast.error(response.message);
